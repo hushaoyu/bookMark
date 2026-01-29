@@ -6,6 +6,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   // 添加 base 配置，根据实际部署路径调整
   base: './',
+  // 将构建输出目录改为根目录，以便GitHub Pages直接部署
+  build: {
+    outDir: '.'
+  },
   plugins: [
     react(),
     VitePWA({
