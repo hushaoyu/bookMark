@@ -18,12 +18,12 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: 'pwa-192x192.svg',
+            src: '/bookMark/pwa-192x192.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           },
           {
-            src: 'pwa-512x512.svg',
+            src: '/bookMark/pwa-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml'
           }
