@@ -49,7 +49,6 @@ const LinkList: React.FC<LinkListProps> = ({ links, onEditLink, onDeleteLink }) 
                         {link.title}
                       </a>
                     </h4>
-                    <p className="link-url">{link.url}</p>
                     {link.tags.length > 0 && (
                       <div className="link-tags">
                         {link.tags.map((t, index) => (
