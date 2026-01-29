@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
 export default defineConfig({
   // 添加 base 配置，根据实际部署路径调整
-  base: './',
+  base: '/bookMark/',
   plugins: [
     react(),
     VitePWA({
