@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
 export default defineConfig({
   // 添加 base 配置，根据实际部署路径调整
-  base: '/bookMark/',
+  base: './',
   plugins: [
     react(),
     VitePWA({
@@ -18,12 +18,12 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/bookMark/pwa-192x192.svg',
+            src: 'pwa-192x192.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           },
           {
-            src: '/bookMark/pwa-512x512.svg',
+            src: 'pwa-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml'
           }
