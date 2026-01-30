@@ -1,4 +1,5 @@
 import React from 'react'
+import styles from '../styles/components/modal.module.css'
 
 interface ModalProps {
   isOpen: boolean
@@ -11,15 +12,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className={styles.modal}>
+      <div className={styles.modalContent}>
+        <div className={styles.modalHeader}>
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>
+          <button className={styles.modalClose} onClick={onClose}>
             ×
           </button>
         </div>
-        <div className="modal-body">
+        <div className={styles.modalBody}>
           {children}
         </div>
       </div>

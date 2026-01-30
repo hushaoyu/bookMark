@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LinkItem } from '../types';
+import styles from '../styles/components/link-list.module.css';
 
 interface LinkListProps {
   links: LinkItem[];
@@ -91,36 +92,36 @@ const LinkList: React.FC<LinkListProps> = ({
   }, {} as Record<string, LinkItem[]>)
 
   return (
-    <div className="link-list">
-      <div className="link-list-header">
-        <h2>链接列表</h2>
-        <div className="header-actions">
+    <div className={styles.linkList}>
+      <div className={styles.linkListHeader}>
+        <h2>列表</h2>
+        <div className={styles.headerActions}>
           {links.length > 0 && (
-            <label className="select-all-label">
+            <label className={styles.selectAllLabel}>
               <input
                 type="checkbox"
                 checked={selectedLinks.length === links.length && links.length > 0}
                 onChange={onSelectAll}
-                className="select-all-checkbox"
+                className={styles.selectAllCheckbox}
               />
               全选
             </label>
           )}
           {selectedLinks.length > 0 && (
-            <div className="batch-actions">
-              <span className="selected-count">已选择 {selectedLinks.length} 个链接</span>
+            <div className={styles.batchActions}>
+              <span className={styles.selectedCount}>已选择 {selectedLinks.length} 个链接</span>
               <button 
-                className="btn-danger"
+                className={styles.btnDanger}
                 onClick={onBatchDelete}
               >
-                批量删除
+                删除
               </button>
             </div>
           )}
         </div>
       </div>
       {Object.keys(linksByTag).length === 0 ? (
-        <div className="empty-message">
+        <div className={styles.emptyMessage}>
           {searchTerm ? '没有找到匹配的链接' : '暂无链接，添加一个吧！'}
         </div>
       ) : (
@@ -128,53 +129,46 @@ const LinkList: React.FC<LinkListProps> = ({
           const isExpanded = expandedTags[tag] !== false; // 默认展开
           
           return (
-            <div key={tag} className="tag-group">
-              <div className="tag-group-header" onClick={() => toggleTagExpansion(tag)}>
+            <div key={tag} className={styles.tagGroup}>
+              <div className={styles.tagGroupHeader} onClick={() => toggleTagExpansion(tag)}>
                 <h3>{tag}</h3>
-                <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
+                <span className={`${styles.expandIcon} ${isExpanded ? styles.expanded : ''}`}>
                   {isExpanded ? '▼' : '▶'}
                 </span>
               </div>
               {isExpanded && (
                 <ul>
                   {tagLinks.map(link => (
-                    <li key={link.id} className="link-item">
-                      <div className="link-checkbox">
+                    <li key={link.id} className={styles.linkItem}>
+                      <div className={styles.linkCheckbox}>
                         <input
                           type="checkbox"
                           checked={selectedLinks.includes(link.id)}
                           onChange={() => onToggleSelectLink(link.id)}
-                          className="link-checkbox-input"
+                          className={styles.linkCheckboxInput}
                         />
                       </div>
-                      <div className="link-info">
+                      <div className={styles.linkInfo}>
                         <h4>
                           <a 
                             href={link.url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="link-title"
+                            className={styles.linkTitle}
                           >
                             {link.title}
                           </a>
                         </h4>
-                        {link.tags.length > 0 && (
-                          <div className="link-tags">
-                            {link.tags.map((tag, index) => (
-                              <span key={index} className="tag">{tag}</span>
-                            ))}
-                          </div>
-                        )}
                       </div>
-                      <div className="link-actions">
+                      <div className={styles.linkActions}>
                         <button 
-                          className="btn-edit"
+                          className={styles.btnEdit}
                           onClick={() => onEditLink(link)}
                         >
                           编辑
                         </button>
                         <button 
-                          className="btn-delete"
+                          className={styles.btnDelete}
                           onClick={() => onDeleteLink(link.id)}
                         >
                           删除

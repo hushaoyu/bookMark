@@ -1,0 +1,8 @@
+** cmd
+- git subtree push --prefix dist origin gh-pages
+
+~~1、增加按标签统计展示数量~~
+~~2、重构应用，组件化开发~~
+~~3、index.css 文件太大，参考之前的组件化进行分割~~
+4、编辑器里面，tsx文件很多ts相关的告警，需要配置tsconfig.json 里面的 "noImplicitAny": false,
+~~5、链接列表，不展示标签信息，按钮只展示文本，不展示背景框，保持一行展示，减少空间占用~~

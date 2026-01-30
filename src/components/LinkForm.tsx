@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { LinkItem } from '../types'
+import styles from '../styles/components/link-form.module.css'
 
 interface LinkFormProps {
   onAddLink: (link: Omit<LinkItem, 'id'>) => void
@@ -100,9 +101,9 @@ const LinkForm: React.FC<LinkFormProps> = ({
   }
 
   return (
-    <form className="link-form" onSubmit={handleSubmit}>
+    <form className={styles.linkForm} onSubmit={handleSubmit}>
       
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="title">标题</label>
         <input
           type="text"
@@ -114,7 +115,7 @@ const LinkForm: React.FC<LinkFormProps> = ({
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="url">链接</label>
         <input
           type="url"
@@ -126,9 +127,9 @@ const LinkForm: React.FC<LinkFormProps> = ({
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>标签</label>
-        <div className="tag-input-container">
+        <div className={styles.tagInputContainer}>
           <input
             type="text"
             value={tagInput}
@@ -139,24 +140,24 @@ const LinkForm: React.FC<LinkFormProps> = ({
             onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
           />
           <button type="button" onClick={handleAddTag}>添加</button>
+          {/* 标签推荐列表 */}
+          {showTagSuggestions && tagSuggestions.length > 0 && (
+            <div className={styles.tagSuggestions}>
+              {tagSuggestions.map((tag, index) => (
+                <div 
+                  key={index} 
+                  className={styles.tagSuggestionItem}
+                  onClick={() => handleSelectTag(tag)}
+                >
+                  {tag}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        {/* 标签推荐列表 */}
-        {showTagSuggestions && tagSuggestions.length > 0 && (
-          <div className="tag-suggestions">
-            {tagSuggestions.map((tag, index) => (
-              <div 
-                key={index} 
-                className="tag-suggestion-item"
-                onClick={() => handleSelectTag(tag)}
-              >
-                {tag}
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="tags-list">
+        <div className={styles.tagsList}>
           {tags.map((tag, index) => (
-            <span key={index} className="tag">
+            <span key={index} className={styles.tag}>
               {tag}
               <button type="button" onClick={() => handleRemoveTag(tag)}>×</button>
             </span>
@@ -164,12 +165,12 @@ const LinkForm: React.FC<LinkFormProps> = ({
         </div>
       </div>
 
-      <div className="form-actions">
-        <button type="submit" className="btn-primary">
+      <div className={styles.formActions}>
+        <button type="submit" className={styles.btnPrimary}>
           {editingLink ? '更新' : '添加'}
         </button>
         {editingLink && (
-          <button type="button" className="btn-secondary" onClick={onCancelEdit}>
+          <button type="button" className={styles.btnSecondary} onClick={onCancelEdit}>
             取消
           </button>
         )}

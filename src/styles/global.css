@@ -1,0 +1,147 @@
+/* 应用容器 */
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+/* 主内容区域 */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 搜索排序容器 */
+.search-sort-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.search-container {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* 排序容器 */
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-select {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.sort-toggle {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sort-toggle:hover {
+  background-color: #f8f9fa;
+  border-color: #3498db;
+}
+
+.sort-toggle:active {
+  transform: translateY(1px);
+}
+
+/* 批量操作栏 */
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 0;
+  animation: fadeIn 0.3s ease;
+}
+
+.batch-actions.hiding {
+  animation: slideUp 0.3s ease-in forwards;
+}
+
+.selected-count {
+  font-size: 0.85rem;
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+/* 空消息 */
+.empty-message {
+  text-align: center;
+  color: var(--gray-color);
+  padding: 60px 20px;
+  font-style: italic;
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius-md);
+  margin: 20px 0;
+  transition: var(--transition);
+}
+
+.empty-message:hover {
+  background-color: #f0f0f0;
+}
+
+.empty-message::before {
+  content: '📭';
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+/* PWA 相关样式 */
+@media (display-mode: standalone) {
+  /* 针对独立模式（已安装的PWA）的样式 */
+  body {
+    /* 可以添加特定于独立模式的样式 */
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app {
+    padding: 15px;
+  }
+}
