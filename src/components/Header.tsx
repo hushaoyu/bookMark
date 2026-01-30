@@ -9,6 +9,8 @@ interface HeaderProps {
   setIsMenuOpen: (open: boolean) => void
   handleSwitchPage: (page: 'list' | 'stats') => void
   handleOpenPasswordSetting: () => void
+  handleExportData: () => void
+  handleImportData: () => void
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -18,7 +20,9 @@ const Header: React.FC<HeaderProps> = ({
   handleAddLink,
   setIsMenuOpen,
   handleSwitchPage,
-  handleOpenPasswordSetting
+  handleOpenPasswordSetting,
+  handleExportData,
+  handleImportData
 }) => {
   return (
     <header className={styles.header}>
@@ -51,6 +55,18 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={handleOpenPasswordSetting}
                 >
                   {passwordSet ? '修改密码' : '设置密码'}
+                </button>
+                <button 
+                  className={styles.menuItem}
+                  onClick={handleExportData}
+                >
+                  导出数据
+                </button>
+                <button 
+                  className={styles.menuItem}
+                  onClick={handleImportData}
+                >
+                  导入数据
                 </button>
               </div>
             )}

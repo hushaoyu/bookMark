@@ -176,6 +176,61 @@ const App: React.FC = () => {
     }
   }
 
+  // 导出数据
+  const handleExportData = () => {
+    const dataStr = JSON.stringify(links, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `links-${new Date().toISOString().slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // 导入数据
+  const handleImportData = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const target = e.target as HTMLInputElement
+      if (target.files && target.files[0]) {
+        const file = target.files[0]
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          try {
+            const importedData = JSON.parse(event.target?.result as string)
+            if (Array.isArray(importedData)) {
+              // 验证导入的数据格式
+              const isValid = importedData.every(item => 
+                typeof item === 'object' && 
+                item !== null && 
+                typeof item.id === 'string' && 
+                typeof item.title === 'string' && 
+                typeof item.url === 'string' && 
+                Array.isArray(item.tags)
+              )
+              if (isValid) {
+                if (window.confirm('确定要导入数据吗？这将覆盖当前的所有链接。')) {
+                  setLinks(importedData)
+                }
+              } else {
+                alert('导入的数据格式不正确，请确保是有效的链接数据。')
+              }
+            } else {
+              alert('导入的数据格式不正确，请确保是有效的链接数据数组。')
+            }
+          } catch (error) {
+            alert('导入失败，请确保上传的是有效的 JSON 文件。')
+          }
+        }
+        reader.readAsText(file)
+      }
+    }
+    input.click()
+  }
+
   return (
     <div className={styles.app}>
       {isAuthenticated || !passwordSet ? (
@@ -188,6 +243,8 @@ const App: React.FC = () => {
             handleAddLink={handleOpenAddModal}
             handleOpenPasswordSetting={handleOpenPasswordSetting}
             passwordSet={passwordSet}
+            handleExportData={handleExportData}
+            handleImportData={handleImportData}
           />
           {/* 收集所有已存在的标签 */}
           {(() => {
