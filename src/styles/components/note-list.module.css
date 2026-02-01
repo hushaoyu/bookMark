@@ -3,6 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: .8rem;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* 搜索栏 */
@@ -10,15 +12,21 @@
   display: flex;
   gap: .8rem;
   align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .searchInput {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .searchInput:focus {
@@ -30,6 +38,8 @@
   font-size: 1rem;
   cursor: pointer;
   transition: border-color 0.2s;
+  min-width: 90px;
+  max-width: 140px;
 }
 
 .categorySelect:focus {
@@ -42,6 +52,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .sortBar span {
@@ -52,6 +65,8 @@
 .sortSelect {
   font-size: 0.9rem;
   cursor: pointer;
+  min-width: 100px;
+  max-width: 180px;
 }
 
 .sortOrderBtn {
@@ -196,6 +211,32 @@
 .noteDate {
   font-size: 0.875rem;
   color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .searchBar {
+    gap: 0.5rem;
+  }
+
+  .searchInput {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .categorySelect {
+    min-width: 80px;
+    max-width: 120px;
+    font-size: 0.9rem;
+  }
+
+  .sortBar {
+    flex-wrap: wrap;
+  }
+
+  .sortSelect {
+    font-size: 0.85rem;
+  }
 }
 
 /* 备忘录操作按钮 */

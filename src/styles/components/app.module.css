@@ -8,6 +8,9 @@
   color: var(--text-color);
   min-height: 100vh;
   background-color: var(--bg-color);
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .app main {
