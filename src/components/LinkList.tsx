@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { LinkItem } from '../types';
 import styles from '../styles/components/link-list.module.css';
 
@@ -31,65 +31,72 @@ const LinkList: React.FC<LinkListProps> = ({
   const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
 
   // 切换标签折叠状态
-  const toggleTagExpansion = (tag: string) => {
+  const toggleTagExpansion = useCallback((tag: string) => {
     setExpandedTags(prev => ({
       ...prev,
       [tag]: !prev[tag]
     }));
-  };
+  }, []);
+  
   // 根据搜索词过滤链接
-  const filteredLinks = links.filter(link => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    return (
-      link.title.toLowerCase().includes(lowerSearchTerm) ||
-      link.url.toLowerCase().includes(lowerSearchTerm) ||
-      link.tags.some(tag => tag.toLowerCase().includes(lowerSearchTerm))
-    );
-  });
+  const filteredLinks = useMemo(() => {
+    return links.filter(link => {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      return (
+        link.title.toLowerCase().includes(lowerSearchTerm) ||
+        link.url.toLowerCase().includes(lowerSearchTerm) ||
+        link.tags.some(tag => tag.toLowerCase().includes(lowerSearchTerm))
+      );
+    });
+  }, [links, searchTerm]);
 
   // 根据排序条件对链接进行排序
-  const sortedLinks = [...filteredLinks].sort((a, b) => {
-    let comparison = 0;
-    
-    switch (sortBy) {
-      case 'title':
-        comparison = a.title.localeCompare(b.title);
-        break;
-      case 'url':
-        comparison = a.url.localeCompare(b.url);
-        break;
-      case 'tags':
-        comparison = a.tags.length - b.tags.length;
-        break;
-      default:
-        comparison = 0;
-    }
-    
-    return sortOrder === 'asc' ? comparison : -comparison;
-  });
+  const sortedLinks = useMemo(() => {
+    return [...filteredLinks].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'url':
+          comparison = a.url.localeCompare(b.url);
+          break;
+        case 'tags':
+          comparison = a.tags.length - b.tags.length;
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [filteredLinks, sortBy, sortOrder]);
 
   // 按标签分组链接
-  const linksByTag = sortedLinks.reduce((groups, link) => {
-    // 如果链接没有标签，放入"未分类"组
-    if (link.tags.length === 0) {
-      if (!groups['未分类']) {
-        groups['未分类'] = []
+  const linksByTag = useMemo(() => {
+    return sortedLinks.reduce((groups, link) => {
+      // 如果链接没有标签，放入"未分类"组
+      if (link.tags.length === 0) {
+        if (!groups['未分类']) {
+          groups['未分类'] = []
+        }
+        groups['未分类'].push(link)
+      } else {
+        // 为每个标签创建分组
+        link.tags.forEach(tag => {
+          if (!groups[tag]) {
+            groups[tag] = []
+          }
+          // 确保每个链接在每个标签组中只出现一次
+          if (!groups[tag].some(l => l.id === link.id)) {
+            groups[tag].push(link)
+          }
+        })
       }
-      groups['未分类'].push(link)
-    } else {
-      // 为每个标签创建分组
-      link.tags.forEach(tag => {
-        if (!groups[tag]) {
-          groups[tag] = []
-        }
-        // 确保每个链接在每个标签组中只出现一次
-        if (!groups[tag].some(l => l.id === link.id)) {
-          groups[tag].push(link)
-        }
-      })
-    }
-    return groups
-  }, {} as Record<string, LinkItem[]>)
+      return groups
+    }, {} as Record<string, LinkItem[]>);
+  }, [sortedLinks]);
 
   return (
     <div className={styles.linkList}>
@@ -109,7 +116,7 @@ const LinkList: React.FC<LinkListProps> = ({
           )}
           {selectedLinks.length > 0 && (
             <div className={styles.batchActions}>
-              <span className={styles.selectedCount}>已选择 {selectedLinks.length} 个链接</span>
+              <span className={styles.selectedCount}>已选 {selectedLinks.length} 个</span>
               <button 
                 className={styles.btnDanger}
                 onClick={onBatchDelete}
@@ -186,4 +193,4 @@ const LinkList: React.FC<LinkListProps> = ({
   );
 }
 
-export default LinkList
+export default React.memo(LinkList)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NoteItem } from '../types'
 import CustomSelect from './CustomSelect'
+import { sanitizeHtml } from '../utils/security'
 import styles from '../styles/components/note-form.module.css'
 
 interface NoteFormProps {
@@ -44,14 +45,18 @@ const NoteForm: React.FC<NoteFormProps> = ({
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
 
+    // 净化输入，防止XSS攻击
+    const sanitizedTitle = sanitizeHtml(title)
+    const sanitizedContent = sanitizeHtml(content)
+
     const now = new Date().toISOString()
 
     if (editingNote) {
       // 更新现有备忘录
       onUpdateNote({
         id: editingNote.id,
-        title,
-        content,
+        title: sanitizedTitle,
+        content: sanitizedContent,
         category,
         createdAt: editingNote.createdAt,
         updatedAt: now,
@@ -60,8 +65,8 @@ const NoteForm: React.FC<NoteFormProps> = ({
     } else {
       // 添加新备忘录
       onAddNote({
-        title,
-        content,
+        title: sanitizedTitle,
+        content: sanitizedContent,
         category,
         isPinned
       })

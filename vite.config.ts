@@ -8,7 +8,15 @@ export default defineConfig({
   base: './',
   // 保持默认的构建输出目录为dist
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    // 生产环境优化
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   plugins: [
     react(),

@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import LinkForm from './components/LinkForm'
-import LinkList from './components/LinkList'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import Modal from './components/Modal'
 import Header from './components/Header'
 import StatsPage from './components/StatsPage'
 import PasswordModal from './components/PasswordModal'
 import CustomSelect from './components/CustomSelect'
-import NoteForm from './components/NoteForm'
-import NoteList from './components/NoteList'
-import NoteDetail from './components/NoteDetail'
+
+// 代码分割
+const LinkForm = lazy(() => import('./components/LinkForm'))
+const LinkList = lazy(() => import('./components/LinkList'))
+const NoteForm = lazy(() => import('./components/NoteForm'))
+const NoteList = lazy(() => import('./components/NoteList'))
+const NoteDetail = lazy(() => import('./components/NoteDetail'))
 import { LinkItem, NoteItem } from './types'
-import useLocalStorage from './hooks/useLocalStorage'
+import useLocalStorage from './hooks/useLocalStorageOptimized'
+import { 
+  generateSalt, 
+  hashPassword, 
+  verifyPassword, 
+  isValidUrl, 
+  isValidTitle, 
+  isValidTag, 
+  generateSecureId 
+} from './utils/security'
 import styles from './styles/components/app.module.css'
 
 const App: React.FC = () => {
@@ -35,9 +46,28 @@ const App: React.FC = () => {
 
   // 添加新链接
   const handleAddLink = (link: Omit<LinkItem, 'id'>) => {
+    // 验证 URL
+    if (!isValidUrl(link.url)) {
+      alert('URL 格式不正确，请输入有效的 URL')
+      return
+    }
+    
+    // 验证标题
+    if (!isValidTitle(link.title)) {
+      alert('标题长度必须在 1-200 个字符之间')
+      return
+    }
+    
+    // 验证标签
+    const invalidTags = link.tags.filter(tag => !isValidTag(tag))
+    if (invalidTags.length > 0) {
+      alert(`以下标签格式不正确：${invalidTags.join(', ')}`)
+      return
+    }
+    
     const newLink: LinkItem = {
       ...link,
-      id: Date.now().toString()
+      id: generateSecureId()
     }
     setLinks(prevLinks => [...prevLinks, newLink])
   }
@@ -60,7 +90,7 @@ const App: React.FC = () => {
     const now = new Date().toISOString()
     const newNote: NoteItem = {
       ...note,
-      id: Date.now().toString(),
+      id: generateSecureId(),
       createdAt: now,
       updatedAt: now
     }
@@ -208,9 +238,17 @@ const App: React.FC = () => {
   }
 
   // 验证密码
-  const handleVerifyPassword = () => {
+  const handleVerifyPassword = async () => {
     const storedPassword = localStorage.getItem('password')
-    if (storedPassword && storedPassword === password) {
+    
+    if (!storedPassword) {
+      setPasswordError('未设置密码')
+      return
+    }
+    
+    const isValid = await verifyPassword(password, storedPassword)
+    
+    if (isValid) {
       setIsAuthenticated(true)
       setIsPasswordVerifyOpen(false)
       setPassword('')
@@ -221,7 +259,7 @@ const App: React.FC = () => {
   }
 
   // 设置密码
-  const handleSetPassword = () => {
+  const handleSetPassword = async () => {
     if (newPassword.length < 4) {
       setPasswordError('密码长度至少4位')
       return
@@ -232,12 +270,21 @@ const App: React.FC = () => {
       return
     }
 
-    localStorage.setItem('password', newPassword)
-    setPasswordSet(true)
-    setIsPasswordSettingOpen(false)
-    setNewPassword('')
-    setPasswordConfirm('')
-    setPasswordError('')
+    try {
+      const salt = generateSalt()
+      const hashedPassword = await hashPassword(newPassword, salt)
+      const storedPassword = `${salt}:${hashedPassword}`
+      
+      localStorage.setItem('password', storedPassword)
+      setPasswordSet(true)
+      setIsPasswordSettingOpen(false)
+      setNewPassword('')
+      setPasswordConfirm('')
+      setPasswordError('')
+    } catch (error) {
+      console.error('密码设置失败:', error)
+      setPasswordError('密码设置失败，请重试')
+    }
   }
 
   // 清除密码
@@ -251,12 +298,16 @@ const App: React.FC = () => {
 
   // 导出数据
   const handleExportData = () => {
-    const dataStr = JSON.stringify(links, null, 2)
+    const exportData = {
+      links,
+      notes
+    }
+    const dataStr = JSON.stringify(exportData, null, 2)
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `links-${new Date().toISOString().slice(0, 10)}.json`
+    link.download = `link-note-app-${new Date().toISOString().slice(0, 10)}.json`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -274,9 +325,55 @@ const App: React.FC = () => {
         reader.onload = (event) => {
           try {
             const importedData = JSON.parse(event.target?.result as string)
-            if (Array.isArray(importedData)) {
-              // 验证导入的数据格式
-              const isValid = importedData.every(item => 
+            
+            // 检查是否为完整的应用数据结构
+            if (typeof importedData === 'object' && importedData !== null) {
+              // 验证并导入链接数据
+              if (Array.isArray(importedData.links)) {
+                const isValidLinks = importedData.links.every((item: any) => 
+                  typeof item === 'object' && 
+                  item !== null && 
+                  typeof item.id === 'string' && 
+                  typeof item.title === 'string' && 
+                  typeof item.url === 'string' && 
+                  Array.isArray(item.tags)
+                )
+                if (!isValidLinks) {
+                  alert('导入的数据格式不正确，请确保链接数据格式有效。')
+                  return
+                }
+              }
+              
+              // 验证并导入备忘录数据
+              if (Array.isArray(importedData.notes)) {
+                const isValidNotes = importedData.notes.every((item: any) => 
+                  typeof item === 'object' && 
+                  item !== null && 
+                  typeof item.id === 'string' && 
+                  typeof item.title === 'string' && 
+                  typeof item.content === 'string' && 
+                  typeof item.category === 'string' && 
+                  typeof item.createdAt === 'string' && 
+                  typeof item.updatedAt === 'string' && 
+                  typeof item.isPinned === 'boolean'
+                )
+                if (!isValidNotes) {
+                  alert('导入的数据格式不正确，请确保备忘录数据格式有效。')
+                  return
+                }
+              }
+              
+              if (window.confirm('确定要导入数据吗？这将覆盖当前的所有数据。')) {
+                if (Array.isArray(importedData.links)) {
+                  setLinks(importedData.links)
+                }
+                if (Array.isArray(importedData.notes)) {
+                  setNotes(importedData.notes)
+                }
+              }
+            } else if (Array.isArray(importedData)) {
+              // 兼容旧格式（只有链接数据）
+              const isValid = importedData.every((item: any) => 
                 typeof item === 'object' && 
                 item !== null && 
                 typeof item.id === 'string' && 
@@ -285,14 +382,14 @@ const App: React.FC = () => {
                 Array.isArray(item.tags)
               )
               if (isValid) {
-                if (window.confirm('确定要导入数据吗？这将覆盖当前的所有链接。')) {
+                if (window.confirm('确定要导入链接数据吗？这将覆盖当前的所有链接。')) {
                   setLinks(importedData)
                 }
               } else {
                 alert('导入的数据格式不正确，请确保是有效的链接数据。')
               }
             } else {
-              alert('导入的数据格式不正确，请确保是有效的链接数据数组。')
+              alert('导入的数据格式不正确，请确保是有效的 JSON 文件。')
             }
           } catch (error) {
             alert('导入失败，请确保上传的是有效的 JSON 文件。')
@@ -328,116 +425,118 @@ const App: React.FC = () => {
             });
 
             return (
-              <>
-                <main>
-                  {activePage === 'list' ? (
-                    <div className={styles.appContainer}>
-                      <div className={styles.searchSortContainer}>
-                        <div className={styles.searchContainer}>
-                          <input
-                            type="text"
-                            placeholder="搜索链接..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className={styles.searchInput}
-                          />
+              <Suspense fallback={<div className={styles.loading}>加载中...</div>}>
+                <>
+                  <main>
+                    {activePage === 'list' ? (
+                      <div className={styles.appContainer}>
+                        <div className={styles.searchSortContainer}>
+                          <div className={styles.searchContainer}>
+                            <input
+                              type="text"
+                              placeholder="搜索链接..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className={styles.searchInput}
+                            />
+                          </div>
+                          <div className={styles.sortContainer}>
+                            <CustomSelect
+                              options={[
+                                { value: 'title', label: '按标题' },
+                                { value: 'url', label: '按URL' },
+                                { value: 'tags', label: '按标签数量' }
+                              ]}
+                              value={sortBy}
+                              onChange={(value) => setSortBy(value as 'title' | 'url' | 'tags')}
+                              placeholder="选择排序方式"
+                            />
+                            <button
+                              className={styles.sortToggle}
+                              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                            >
+                              {sortOrder === 'asc' ? '↑' : '↓'}
+                            </button>
+                          </div>
                         </div>
-                        <div className={styles.sortContainer}>
-                          <CustomSelect
-                            options={[
-                              { value: 'title', label: '按标题' },
-                              { value: 'url', label: '按URL' },
-                              { value: 'tags', label: '按标签数量' }
-                            ]}
-                            value={sortBy}
-                            onChange={(value) => setSortBy(value as 'title' | 'url' | 'tags')}
-                            placeholder="选择排序方式"
-                          />
-                          <button
-                            className={styles.sortToggle}
-                            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                          >
-                            {sortOrder === 'asc' ? '↑' : '↓'}
-                          </button>
-                        </div>
+                        <LinkList
+                          links={links}
+                          searchTerm={searchTerm}
+                          sortBy={sortBy}
+                          sortOrder={sortOrder}
+                          selectedLinks={selectedLinks}
+                          onEditLink={handleEditLink}
+                          onDeleteLink={handleDeleteLink}
+                          onToggleSelectLink={handleToggleSelectLink}
+                          onSelectAll={handleSelectAll}
+                          onBatchDelete={handleBatchDelete}
+                        />
                       </div>
-                      <LinkList
-                        links={links}
-                        searchTerm={searchTerm}
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        selectedLinks={selectedLinks}
-                        onEditLink={handleEditLink}
-                        onDeleteLink={handleDeleteLink}
-                        onToggleSelectLink={handleToggleSelectLink}
-                        onSelectAll={handleSelectAll}
-                        onBatchDelete={handleBatchDelete}
-                      />
-                    </div>
-                  ) : activePage === 'notes' ? (
-                    <div className={styles.appContainer}>
-                      <NoteList
-                        notes={notes}
-                        onEditNote={handleEditNote}
-                        onDeleteNote={handleDeleteNote}
-                        onTogglePin={handleToggleNotePin}
-                        categories={noteCategories}
-                      />
-                    </div>
-                  ) : (
-                    <StatsPage links={links} />
+                    ) : activePage === 'notes' ? (
+                      <div className={styles.appContainer}>
+                        <NoteList
+                          notes={notes}
+                          onEditNote={handleEditNote}
+                          onDeleteNote={handleDeleteNote}
+                          onTogglePin={handleToggleNotePin}
+                          categories={noteCategories}
+                        />
+                      </div>
+                    ) : (
+                      <StatsPage links={links} />
+                    )}
+                  </main>
+                  {/* 添加/编辑链接弹框 */}
+                  <Modal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    title={editingLink ? '编辑链接' : '添加新链接'}
+                  >
+                    <LinkForm
+                      onAddLink={(link) => {
+                        handleAddLink(link)
+                        handleCloseModal()
+                      }}
+                      onUpdateLink={(link) => {
+                        handleUpdateLink(link)
+                        handleCloseModal()
+                      }}
+                      editingLink={editingLink}
+                      onCancelEdit={handleCloseModal}
+                      existingTags={Array.from(allTags)}
+                    />
+                  </Modal>
+                  {/* 添加/编辑备忘录弹框 */}
+                  <Modal
+                    isOpen={isNoteModalOpen}
+                    onClose={handleCloseNoteModal}
+                    title={editingNote ? '编辑备忘录' : '添加新备忘录'}
+                  >
+                    <NoteForm
+                      onAddNote={(note) => {
+                        handleAddNote(note)
+                        handleCloseNoteModal()
+                      }}
+                      onUpdateNote={(note) => {
+                        handleUpdateNote(note)
+                        handleCloseNoteModal()
+                      }}
+                      editingNote={editingNote}
+                      onCancelEdit={handleCloseNoteModal}
+                      categories={noteCategories}
+                    />
+                  </Modal>
+                  {/* 备忘录详情 */}
+                  {isNoteDetailOpen && viewingNote && (
+                    <NoteDetail
+                      note={viewingNote}
+                      onEdit={handleEditNote}
+                      onDelete={handleDeleteNote}
+                      onClose={handleCloseNoteDetail}
+                    />
                   )}
-                </main>
-                {/* 添加/编辑链接弹框 */}
-                <Modal
-                  isOpen={isModalOpen}
-                  onClose={handleCloseModal}
-                  title={editingLink ? '编辑链接' : '添加新链接'}
-                >
-                  <LinkForm
-                    onAddLink={(link) => {
-                      handleAddLink(link)
-                      handleCloseModal()
-                    }}
-                    onUpdateLink={(link) => {
-                      handleUpdateLink(link)
-                      handleCloseModal()
-                    }}
-                    editingLink={editingLink}
-                    onCancelEdit={handleCloseModal}
-                    existingTags={Array.from(allTags)}
-                  />
-                </Modal>
-                {/* 添加/编辑备忘录弹框 */}
-                <Modal
-                  isOpen={isNoteModalOpen}
-                  onClose={handleCloseNoteModal}
-                  title={editingNote ? '编辑备忘录' : '添加新备忘录'}
-                >
-                  <NoteForm
-                    onAddNote={(note) => {
-                      handleAddNote(note)
-                      handleCloseNoteModal()
-                    }}
-                    onUpdateNote={(note) => {
-                      handleUpdateNote(note)
-                      handleCloseNoteModal()
-                    }}
-                    editingNote={editingNote}
-                    onCancelEdit={handleCloseNoteModal}
-                    categories={noteCategories}
-                  />
-                </Modal>
-                {/* 备忘录详情 */}
-                {isNoteDetailOpen && viewingNote && (
-                  <NoteDetail
-                    note={viewingNote}
-                    onEdit={handleEditNote}
-                    onDelete={handleDeleteNote}
-                    onClose={handleCloseNoteDetail}
-                  />
-                )}
-              </>
+                </>
+              </Suspense>
             );
           })()}
         </>

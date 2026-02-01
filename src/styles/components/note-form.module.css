@@ -151,6 +151,7 @@
 /* 表单操作按钮 */
 .formActions {
   display: flex;
+  justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
 }

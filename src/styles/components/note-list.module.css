@@ -4,7 +4,6 @@
   flex-direction: column;
   gap: .8rem;
   width: 100%;
-  overflow-x: hidden;
 }
 
 /* 搜索栏 */
@@ -14,7 +13,6 @@
   align-items: center;
   flex-wrap: wrap;
   width: 100%;
-  overflow-x: hidden;
 }
 
 .searchInput {
@@ -54,7 +52,6 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   width: 100%;
-  overflow-x: hidden;
 }
 
 .sortBar span {
@@ -122,7 +119,7 @@
   background: white;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 8px 14px;
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -142,8 +139,8 @@
 .noteHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
+  align-items: centers;
+  margin-bottom: 0.48rem;
 }
 
 .noteTitleRow {
@@ -154,12 +151,12 @@
 }
 
 .pinIcon {
-  font-size: 1.25rem;
+  font-size: .8rem;
 }
 
 .noteTitle {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
   line-height: 1.4;
@@ -168,8 +165,8 @@
 .noteCategory {
   padding: 0.25rem 0.75rem;
   background-color: #f5f5f5;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -243,17 +240,17 @@
 .noteActions {
   display: flex;
   gap: 0.5rem;
-  padding-top: 1rem;
+  padding-top: .8rem;
   border-top: 1px solid #e0e0e0;
 }
 
 .actionBtn {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem .8rem;
   background-color: #f5f5f5;
   color: #333;
   border: none;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.2s;
 }
