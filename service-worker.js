@@ -64,6 +64,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// 监听来自客户端的消息
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // 处理请求
 self.addEventListener('fetch', (event) => {
   const request = event.request;
