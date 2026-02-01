@@ -57,9 +57,12 @@ const App: React.FC = () => {
 
   // 添加新备忘录
   const handleAddNote = (note: Omit<NoteItem, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const now = new Date().toISOString()
     const newNote: NoteItem = {
       ...note,
-      id: Date.now().toString()
+      id: Date.now().toString(),
+      createdAt: now,
+      updatedAt: now
     }
     setNotes(prevNotes => [...prevNotes, newNote])
   }
@@ -94,11 +97,7 @@ const App: React.FC = () => {
     setIsNoteDetailOpen(false)
   }
 
-  // 查看备忘录详情
-  const handleViewNote = (note: NoteItem) => {
-    setViewingNote(note)
-    setIsNoteDetailOpen(true)
-  }
+
 
   // 打开添加备忘录弹框
   const handleOpenAddNoteModal = () => {

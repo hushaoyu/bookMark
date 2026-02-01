@@ -63,8 +63,6 @@ const NoteForm: React.FC<NoteFormProps> = ({
         title,
         content,
         category,
-        createdAt: now,
-        updatedAt: now,
         isPinned
       })
       // 重置表单

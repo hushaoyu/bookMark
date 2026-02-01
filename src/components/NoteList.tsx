@@ -62,27 +62,7 @@ const NoteList: React.FC<NoteListProps> = ({
     return sortOrder === 'asc' ? comparison : -comparison
   })
 
-  // 格式化日期
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-    if (days === 0) {
-      return '今天'
-    } else if (days === 1) {
-      return '昨天'
-    } else if (days < 7) {
-      return `${days}天前`
-    } else {
-      return date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      })
-    }
-  }
 
   // 获取分类颜色
   const getCategoryColor = (category: string) => {
