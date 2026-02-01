@@ -4,6 +4,9 @@ import Header from './components/Header'
 import StatsPage from './components/StatsPage'
 import PasswordModal from './components/PasswordModal'
 import CustomSelect from './components/CustomSelect'
+import UpdateChecker from './components/UpdateChecker'
+import SettingsModal from './components/SettingsModal'
+import useUpdateChecker from './hooks/useUpdateChecker'
 
 // 代码分割
 const LinkForm = lazy(() => import('./components/LinkForm'))
@@ -40,9 +43,22 @@ const App: React.FC = () => {
   const [viewingNote, setViewingNote] = useState<NoteItem | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activePage, setActivePage] = useState<'list' | 'stats' | 'notes'>('list')
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // 备忘录分类
   const [noteCategories] = useState<string[]>(['默认', '工作', '学习', '生活', '娱乐', '重要', '其他'])
+
+  // 使用更新检查 hook
+  const {
+    autoCheckUpdate,
+    toggleAutoCheckUpdate,
+    checkForUpdate,
+    applyUpdate,
+    dismissUpdate,
+    hasUpdate,
+    isChecking,
+    error: updateError
+  } = useUpdateChecker()
 
   // 添加新链接
   const handleAddLink = (link: Omit<LinkItem, 'id'>) => {
@@ -203,6 +219,17 @@ const App: React.FC = () => {
   const handleSwitchPage = (page: 'list' | 'stats' | 'notes') => {
     setActivePage(page)
     setIsMenuOpen(false)
+  }
+
+  // 打开设置弹框
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true)
+    setIsMenuOpen(false)
+  }
+
+  // 关闭设置弹框
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false)
   }
 
   // 密码相关状态
@@ -403,6 +430,15 @@ const App: React.FC = () => {
 
   return (
     <div className={styles.app}>
+      {/* 更新检查器 */}
+      <UpdateChecker
+        hasUpdate={hasUpdate}
+        isChecking={isChecking}
+        error={updateError}
+        onApplyUpdate={applyUpdate}
+        onDismissUpdate={dismissUpdate}
+      />
+
       {isAuthenticated || !passwordSet ? (
         <>
           <Header
@@ -416,6 +452,7 @@ const App: React.FC = () => {
             handleExportData={handleExportData}
             handleImportData={handleImportData}
             handleOpenAddNoteModal={handleOpenAddNoteModal}
+            handleOpenSettings={handleOpenSettings}
           />
           {/* 收集所有已存在的标签 */}
           {(() => {
@@ -564,6 +601,16 @@ const App: React.FC = () => {
         handleClearPassword={handleClearPassword}
         handleCloseVerify={() => setIsPasswordVerifyOpen(false)}
         handleCloseSetting={() => setIsPasswordSettingOpen(false)}
+      />
+
+      {/* 设置弹窗 */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        autoCheckUpdate={autoCheckUpdate}
+        onClose={handleCloseSettings}
+        onToggleAutoCheckUpdate={toggleAutoCheckUpdate}
+        onCheckForUpdate={checkForUpdate}
+        isChecking={isChecking}
       />
     </div>
   )

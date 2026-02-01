@@ -12,6 +12,7 @@ interface HeaderProps {
   handleOpenPasswordSetting: () => void
   handleExportData: () => void
   handleImportData: () => void
+  handleOpenSettings: () => void
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -24,7 +25,8 @@ const Header: React.FC<HeaderProps> = ({
   handleSwitchPage,
   handleOpenPasswordSetting,
   handleExportData,
-  handleImportData
+  handleImportData,
+  handleOpenSettings
 }) => {
   return (
     <header className={styles.header}>
@@ -49,41 +51,47 @@ const Header: React.FC<HeaderProps> = ({
             </button>
             {isMenuOpen && (
               <div className={styles.menuDropdown}>
-                <button 
+                <button
                   className={`${styles.menuItem} ${activePage === 'list' ? styles.active : ''}`}
                   onClick={() => handleSwitchPage('list')}
                 >
-                  链接列表
+                  🔗 链接列表
                 </button>
-                <button 
+                <button
                   className={`${styles.menuItem} ${activePage === 'notes' ? styles.active : ''}`}
                   onClick={() => handleSwitchPage('notes')}
                 >
-                  备忘录
+                  📝 备忘录
                 </button>
-                <button 
+                <button
                   className={`${styles.menuItem} ${activePage === 'stats' ? styles.active : ''}`}
                   onClick={() => handleSwitchPage('stats')}
                 >
-                  统计分析
+                  📊 统计分析
                 </button>
-                <button 
+                <button
+                  className={styles.menuItem}
+                  onClick={handleOpenSettings}
+                >
+                  ⚙️ 设置
+                </button>
+                <button
                   className={styles.menuItem}
                   onClick={handleOpenPasswordSetting}
                 >
-                  {passwordSet ? '修改密码' : '设置密码'}
+                  🔐 {passwordSet ? '修改密码' : '设置密码'}
                 </button>
-                <button 
+                <button
                   className={styles.menuItem}
                   onClick={handleExportData}
                 >
-                  导出数据
+                  📤 导出数据
                 </button>
-                <button 
+                <button
                   className={styles.menuItem}
                   onClick={handleImportData}
                 >
-                  导入数据
+                  📥 导入数据
                 </button>
               </div>
             )}
