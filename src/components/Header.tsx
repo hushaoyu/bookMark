@@ -2,12 +2,13 @@ import React from 'react'
 import styles from '../styles/components/header.module.css'
 
 interface HeaderProps {
-  activePage: 'list' | 'stats'
+  activePage: 'list' | 'stats' | 'notes'
   isMenuOpen: boolean
   passwordSet: boolean
   handleAddLink: () => void
+  handleOpenAddNoteModal: () => void
   setIsMenuOpen: (open: boolean) => void
-  handleSwitchPage: (page: 'list' | 'stats') => void
+  handleSwitchPage: (page: 'list' | 'stats' | 'notes') => void
   handleOpenPasswordSetting: () => void
   handleExportData: () => void
   handleImportData: () => void
@@ -18,6 +19,7 @@ const Header: React.FC<HeaderProps> = ({
   isMenuOpen,
   passwordSet,
   handleAddLink,
+  handleOpenAddNoteModal,
   setIsMenuOpen,
   handleSwitchPage,
   handleOpenPasswordSetting,
@@ -27,11 +29,20 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
-        <h1 className={styles.headerTitle}>链接管理器</h1>
+        <h1 className={styles.headerTitle}>
+          {activePage === 'list' ? '链接管理器' : activePage === 'notes' ? '备忘录' : '统计分析'}
+        </h1>
         <div className={styles.headerActions}>
-          <button className={styles.btnPrimary} onClick={handleAddLink}>
-            + 添加链接
-          </button>
+          {activePage === 'list' && (
+            <button className={styles.btnPrimary} onClick={handleAddLink}>
+              + 添加链接
+            </button>
+          )}
+          {activePage === 'notes' && (
+            <button className={styles.btnPrimary} onClick={handleOpenAddNoteModal}>
+              + 添加备忘录
+            </button>
+          )}
           <div className={styles.menuButtonContainer}>
             <button className={styles.menuButton} onClick={() => setIsMenuOpen(!isMenuOpen)}>
               ☰
@@ -43,6 +54,12 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={() => handleSwitchPage('list')}
                 >
                   链接列表
+                </button>
+                <button 
+                  className={`${styles.menuItem} ${activePage === 'notes' ? styles.active : ''}`}
+                  onClick={() => handleSwitchPage('notes')}
+                >
+                  备忘录
                 </button>
                 <button 
                   className={`${styles.menuItem} ${activePage === 'stats' ? styles.active : ''}`}

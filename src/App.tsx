@@ -6,21 +6,32 @@ import Header from './components/Header'
 import StatsPage from './components/StatsPage'
 import PasswordModal from './components/PasswordModal'
 import CustomSelect from './components/CustomSelect'
-import { LinkItem } from './types'
+import NoteForm from './components/NoteForm'
+import NoteList from './components/NoteList'
+import NoteDetail from './components/NoteDetail'
+import { LinkItem, NoteItem } from './types'
 import useLocalStorage from './hooks/useLocalStorage'
 import styles from './styles/components/app.module.css'
 
 const App: React.FC = () => {
   const [links, setLinks] = useLocalStorage<LinkItem[]>('links', [])
+  const [notes, setNotes] = useLocalStorage<NoteItem[]>('notes', [])
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null)
+  const [editingNote, setEditingNote] = useState<NoteItem | null>(null)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [sortBy, setSortBy] = useState<'title' | 'url' | 'tags'>('title')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [selectedLinks, setSelectedLinks] = useState<string[]>([])
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
+  const [isNoteDetailOpen, setIsNoteDetailOpen] = useState(false)
+  const [viewingNote, setViewingNote] = useState<NoteItem | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState<'list' | 'stats'>('list')
+  const [activePage, setActivePage] = useState<'list' | 'stats' | 'notes'>('list')
+
+  // 备忘录分类
+  const [noteCategories] = useState<string[]>(['默认', '工作', '学习', '生活', '娱乐', '重要', '其他'])
 
   // 添加新链接
   const handleAddLink = (link: Omit<LinkItem, 'id'>) => {
@@ -42,6 +53,69 @@ const App: React.FC = () => {
     if (window.confirm('确定要删除这个链接吗？')) {
       setLinks(prevLinks => prevLinks.filter(link => link.id !== id))
     }
+  }
+
+  // 添加新备忘录
+  const handleAddNote = (note: Omit<NoteItem, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newNote: NoteItem = {
+      ...note,
+      id: Date.now().toString()
+    }
+    setNotes(prevNotes => [...prevNotes, newNote])
+  }
+
+  // 更新备忘录
+  const handleUpdateNote = (updatedNote: NoteItem) => {
+    setNotes(prevNotes => prevNotes.map(note => note.id === updatedNote.id ? updatedNote : note))
+    setEditingNote(null)
+  }
+
+  // 删除备忘录
+  const handleDeleteNote = (id: string) => {
+    if (window.confirm('确定要删除这个备忘录吗？')) {
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== id))
+      setIsNoteDetailOpen(false)
+    }
+  }
+
+  // 切换备忘录置顶状态
+  const handleToggleNotePin = (id: string) => {
+    setNotes(prevNotes => 
+      prevNotes.map(note => 
+        note.id === id ? { ...note, isPinned: !note.isPinned } : note
+      )
+    )
+  }
+
+  // 开始编辑备忘录
+  const handleEditNote = (note: NoteItem) => {
+    setEditingNote(note)
+    setIsNoteModalOpen(true)
+    setIsNoteDetailOpen(false)
+  }
+
+  // 查看备忘录详情
+  const handleViewNote = (note: NoteItem) => {
+    setViewingNote(note)
+    setIsNoteDetailOpen(true)
+  }
+
+  // 打开添加备忘录弹框
+  const handleOpenAddNoteModal = () => {
+    setEditingNote(null)
+    setIsNoteModalOpen(true)
+  }
+
+  // 关闭备忘录弹框
+  const handleCloseNoteModal = () => {
+    setIsNoteModalOpen(false)
+    setEditingNote(null)
+  }
+
+  // 关闭备忘录详情
+  const handleCloseNoteDetail = () => {
+    setIsNoteDetailOpen(false)
+    setViewingNote(null)
   }
 
   // 批量删除链接
@@ -97,7 +171,7 @@ const App: React.FC = () => {
 
 
   // 切换页面
-  const handleSwitchPage = (page: 'list' | 'stats') => {
+  const handleSwitchPage = (page: 'list' | 'stats' | 'notes') => {
     setActivePage(page)
     setIsMenuOpen(false)
   }
@@ -245,6 +319,7 @@ const App: React.FC = () => {
             passwordSet={passwordSet}
             handleExportData={handleExportData}
             handleImportData={handleImportData}
+            handleOpenAddNoteModal={handleOpenAddNoteModal}
           />
           {/* 收集所有已存在的标签 */}
           {(() => {
@@ -252,6 +327,7 @@ const App: React.FC = () => {
             links.forEach(link => {
               link.tags.forEach(tag => allTags.add(tag));
             });
+
             return (
               <>
                 <main>
@@ -299,6 +375,16 @@ const App: React.FC = () => {
                         onBatchDelete={handleBatchDelete}
                       />
                     </div>
+                  ) : activePage === 'notes' ? (
+                    <div className={styles.appContainer}>
+                      <NoteList
+                        notes={notes}
+                        onEditNote={handleEditNote}
+                        onDeleteNote={handleDeleteNote}
+                        onTogglePin={handleToggleNotePin}
+                        categories={noteCategories}
+                      />
+                    </div>
                   ) : (
                     <StatsPage links={links} />
                   )}
@@ -323,6 +409,35 @@ const App: React.FC = () => {
                     existingTags={Array.from(allTags)}
                   />
                 </Modal>
+                {/* 添加/编辑备忘录弹框 */}
+                <Modal
+                  isOpen={isNoteModalOpen}
+                  onClose={handleCloseNoteModal}
+                  title={editingNote ? '编辑备忘录' : '添加新备忘录'}
+                >
+                  <NoteForm
+                    onAddNote={(note) => {
+                      handleAddNote(note)
+                      handleCloseNoteModal()
+                    }}
+                    onUpdateNote={(note) => {
+                      handleUpdateNote(note)
+                      handleCloseNoteModal()
+                    }}
+                    editingNote={editingNote}
+                    onCancelEdit={handleCloseNoteModal}
+                    categories={noteCategories}
+                  />
+                </Modal>
+                {/* 备忘录详情 */}
+                {isNoteDetailOpen && viewingNote && (
+                  <NoteDetail
+                    note={viewingNote}
+                    onEdit={handleEditNote}
+                    onDelete={handleDeleteNote}
+                    onClose={handleCloseNoteDetail}
+                  />
+                )}
               </>
             );
           })()}
