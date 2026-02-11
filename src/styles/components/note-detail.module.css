@@ -108,12 +108,15 @@
 
 .contentText {
   margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
   font-family: inherit;
   font-size: 1rem;
-  line-height: 1.8;
   color: #333;
+}
+
+.contentLine {
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* 标签 */

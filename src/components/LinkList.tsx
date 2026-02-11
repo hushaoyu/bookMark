@@ -156,7 +156,7 @@ const LinkList: React.FC<LinkListProps> = ({
                         />
                       </div>
                       <div className={styles.linkInfo}>
-                        <h4>
+                        <h5>
                           <a 
                             href={link.url} 
                             target="_blank" 
@@ -165,7 +165,7 @@ const LinkList: React.FC<LinkListProps> = ({
                           >
                             {link.title}
                           </a>
-                        </h4>
+                        </h5>
                       </div>
                       <div className={styles.linkActions}>
                         <button 

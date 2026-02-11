@@ -113,7 +113,7 @@
 
 .settingLabel {
   display: block;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: #111827;
   margin-bottom: 4px;
@@ -235,6 +235,86 @@
   transform: translateY(0);
 }
 
+/* 危险按钮样式（用于清除缓存） */
+.btnDanger {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btnDanger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btnDanger:active {
+  transform: translateY(0);
+}
+
+/* 缓存项表格样式 */
+.cacheItemsTable {
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cacheItemsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.cacheItemsTable th,
+.cacheItemsTable td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cacheItemsTable th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.cacheItemsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.cacheItemsTable tr:hover {
+  background-color: #f9fafb;
+}
+
+.cacheItemsTable td:first-child {
+  font-family: monospace;
+  color: #4b5563;
+}
+
+.cacheItemsTable td:last-child {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.emptyCache {
+  text-align: center !important;
+  padding: 24px !important;
+  color: #9ca3af;
+  font-style: italic;
+}
+
 @media (max-width: 640px) {
   .modalContent {
     max-height: 95vh;
@@ -249,7 +329,8 @@
   }
 
   .switch,
-  .btnCheckUpdate {
+  .btnCheckUpdate,
+  .btnDanger {
     align-self: flex-end;
   }
 }

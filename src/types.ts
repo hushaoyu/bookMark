@@ -15,6 +15,14 @@ export interface NoteItem {
   createdAt: string
   updatedAt: string
   isPinned: boolean
+  tasks?: TaskItem[]
+}
+
+// 任务项类型定义
+export interface TaskItem {
+  id: string
+  text: string
+  completed: boolean
 }
 
 // 备忘录分类类型定义

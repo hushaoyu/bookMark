@@ -144,6 +144,20 @@ const NoteList: React.FC<NoteListProps> = ({
 
 
 
+              <div className={styles.noteContent}>
+                <p className={styles.notePreview}>
+                  {note.content.substring(0, 100)}
+                  {note.content.length > 100 ? '...' : ''}
+                </p>
+                {note.tasks && note.tasks.length > 0 && (
+                  <div className={styles.taskPreview}>
+                    <span className={styles.taskCount}>
+                      ✓ {note.tasks.filter(t => t.completed).length}/{note.tasks.length} 任务
+                    </span>
+                  </div>
+                )}
+              </div>
+
               <div className={styles.noteActions}>
                 <button
                   onClick={() => onTogglePin(note.id)}

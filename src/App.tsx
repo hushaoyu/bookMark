@@ -13,9 +13,9 @@ const LinkForm = lazy(() => import('./components/LinkForm'))
 const LinkList = lazy(() => import('./components/LinkList'))
 const NoteForm = lazy(() => import('./components/NoteForm'))
 const NoteList = lazy(() => import('./components/NoteList'))
-const NoteDetail = lazy(() => import('./components/NoteDetail'))
+
 import { LinkItem, NoteItem } from './types'
-import useLocalStorage from './hooks/useLocalStorageOptimized'
+import useLocalStorage from './hooks/useIncrementalStorage'
 import { 
   generateSalt, 
   hashPassword, 
@@ -39,8 +39,7 @@ const App: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
-  const [isNoteDetailOpen, setIsNoteDetailOpen] = useState(false)
-  const [viewingNote, setViewingNote] = useState<NoteItem | null>(null)
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activePage, setActivePage] = useState<'list' | 'stats' | 'notes'>('list')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -123,7 +122,6 @@ const App: React.FC = () => {
   const handleDeleteNote = (id: string) => {
     if (window.confirm('确定要删除这个备忘录吗？')) {
       setNotes(prevNotes => prevNotes.filter(note => note.id !== id))
-      setIsNoteDetailOpen(false)
     }
   }
 
@@ -140,8 +138,9 @@ const App: React.FC = () => {
   const handleEditNote = (note: NoteItem) => {
     setEditingNote(note)
     setIsNoteModalOpen(true)
-    setIsNoteDetailOpen(false)
   }
+
+
 
 
 
@@ -158,10 +157,10 @@ const App: React.FC = () => {
   }
 
   // 关闭备忘录详情
-  const handleCloseNoteDetail = () => {
-    setIsNoteDetailOpen(false)
-    setViewingNote(null)
-  }
+  // const handleCloseNoteDetail = () => {
+  //   setIsNoteDetailOpen(false)
+  //   setViewingNote(null)
+  // }
 
   // 批量删除链接
   const handleBatchDelete = () => {
@@ -563,15 +562,7 @@ const App: React.FC = () => {
                       categories={noteCategories}
                     />
                   </Modal>
-                  {/* 备忘录详情 */}
-                  {isNoteDetailOpen && viewingNote && (
-                    <NoteDetail
-                      note={viewingNote}
-                      onEdit={handleEditNote}
-                      onDelete={handleDeleteNote}
-                      onClose={handleCloseNoteDetail}
-                    />
-                  )}
+
                 </>
               </Suspense>
             );

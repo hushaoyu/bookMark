@@ -88,7 +88,7 @@ if (fs.existsSync(appPath)) {
   }
   
   // 检查是否使用优化的 hook
-  if (content.includes('useLocalStorageOptimized')) {
+  if (content.includes('useLocalStorageOptimized') || content.includes('useIncrementalStorage')) {
     results.passed.push('✅ App.tsx 使用优化的 localStorage hook')
   } else {
     results.warnings.push('⚠️  App.tsx 可能未使用优化的 localStorage hook')

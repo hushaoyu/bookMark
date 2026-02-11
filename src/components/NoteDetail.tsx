@@ -1,4 +1,6 @@
-import { NoteItem } from '../types'
+import { useState } from 'react'
+import { NoteItem, TaskItem } from '../types'
+import TaskListDisplay from './TaskListDisplay'
 import styles from '../styles/components/note-detail.module.css'
 
 interface NoteDetailProps {
@@ -14,6 +16,17 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   onDelete,
   onClose
 }) => {
+  const [tasks, setTasks] = useState<TaskItem[]>(note.tasks || [])
+
+  // 切换任务完成状态
+  const handleToggleTask = (taskId: string) => {
+    setTasks(
+      tasks.map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      )
+    )
+  }
+
   // 格式化日期
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -65,8 +78,19 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
         {/* 内容 */}
         <div className={styles.detailContent}>
-          <pre className={styles.contentText}>{note.content}</pre>
+          <div className={styles.contentText}>{note.content.split('\n').map((line, index) => (
+            <div key={index} className={styles.contentLine}>
+              {line}
+            </div>
+          ))}</div>
         </div>
+
+        {/* 任务列表 */}
+        <TaskListDisplay
+          tasks={tasks}
+          onToggleTask={handleToggleTask}
+          editable={true}
+        />
 
 
 

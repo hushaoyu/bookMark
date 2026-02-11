@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from '../styles/components/settingsModal.module.css'
+import { calculateTotalCacheSize, formatBytes, clearAllCache, getCacheItemsInfo, CacheItemInfo } from '../utils/storageUtils'
 
 /**
  * SettingsModal 组件属性接口
@@ -25,6 +26,33 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onCheckForUpdate,
   isChecking
 }) => {
+  const [cacheSize, setCacheSize] = useState<string>('0 B');
+  const [cacheItems, setCacheItems] = useState<CacheItemInfo[]>([]);
+
+  // 计算缓存大小和获取缓存项信息
+  const updateCacheInfo = () => {
+    const size = calculateTotalCacheSize();
+    setCacheSize(formatBytes(size));
+    setCacheItems(getCacheItemsInfo());
+  };
+
+  // 清除缓存
+  const handleClearCache = () => {
+    if (window.confirm('确定要清除所有缓存数据吗？这将删除所有链接和备忘录。')) {
+      clearAllCache();
+      updateCacheInfo();
+      // 提示用户清除成功
+      alert('缓存已清除，请刷新页面以重新加载应用。');
+    }
+  };
+
+  // 当组件打开时，更新缓存信息
+  useEffect(() => {
+    if (isOpen) {
+      updateCacheInfo();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null
 
   return (
@@ -72,6 +100,63 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 disabled={isChecking}
               >
                 {isChecking ? '检查中...' : '检查更新'}
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingSection}>
+            <h3 className={styles.settingSectionTitle}>存储设置</h3>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>缓存大小</label>
+                <p className={styles.settingDescription}>
+                  当前本地存储使用: {cacheSize}
+                </p>
+              </div>
+            </div>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>缓存项详情</label>
+                <div className={styles.cacheItemsTable}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>键名</th>
+                        <th>大小</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cacheItems.length > 0 ? (
+                        cacheItems.map((item, index) => (
+                          <tr key={index}>
+                            <td>{item.key}</td>
+                            <td>{item.formattedSize}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={2} className={styles.emptyCache}>
+                            无缓存数据
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>清除缓存</label>
+                <p className={styles.settingDescription}>
+                  清除所有本地存储的数据，包括链接和备忘录
+                </p>
+              </div>
+              <button
+                className={styles.btnDanger}
+                onClick={handleClearCache}
+              >
+                清除缓存
               </button>
             </div>
           </div>
