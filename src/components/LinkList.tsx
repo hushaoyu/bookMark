@@ -29,6 +29,8 @@ const LinkList: React.FC<LinkListProps> = ({
 }) => {
   // 标签折叠状态管理
   const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
+  // 复制成功提示状态
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
 
   // 切换标签折叠状态
   const toggleTagExpansion = useCallback((tag: string) => {
@@ -36,6 +38,31 @@ const LinkList: React.FC<LinkListProps> = ({
       ...prev,
       [tag]: !prev[tag]
     }));
+  }, []);
+
+  // 复制链接到剪贴板
+  const copyLinkToClipboard = useCallback(async (url: string, linkId: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedLinkId(linkId);
+      // 2秒后清除提示
+      setTimeout(() => setCopiedLinkId(null), 2000);
+    } catch (error) {
+      console.error('复制失败:', error);
+      // 降级方案：使用传统方法
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopiedLinkId(linkId);
+        setTimeout(() => setCopiedLinkId(null), 2000);
+      } catch (err) {
+        console.error('降级复制也失败:', err);
+      }
+      document.body.removeChild(textArea);
+    }
   }, []);
   
   // 根据搜索词过滤链接
@@ -168,6 +195,13 @@ const LinkList: React.FC<LinkListProps> = ({
                         </h5>
                       </div>
                       <div className={styles.linkActions}>
+                        <button 
+                          className={`${styles.btnCopy} ${copiedLinkId === link.id ? styles.copied : ''}`}
+                          onClick={() => copyLinkToClipboard(link.url, link.id)}
+                          title="复制链接"
+                        >
+                          {copiedLinkId === link.id ? '已复制' : '复制'}
+                        </button>
                         <button 
                           className={styles.btnEdit}
                           onClick={() => onEditLink(link)}

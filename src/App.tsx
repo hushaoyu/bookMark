@@ -389,12 +389,92 @@ const App: React.FC = () => {
                 }
               }
               
-              if (window.confirm('确定要导入数据吗？这将覆盖当前的所有数据。')) {
+              // 询问用户是覆盖还是合并导入
+              const importOption = window.confirm('请选择导入方式：\n点击确定 - 覆盖当前数据\n点击取消 - 合并导入数据（避免重复）')
+              
+              if (importOption) {
+                // 覆盖模式
                 if (Array.isArray(importedData.links)) {
-                  setLinks(importedData.links)
+                  // 为链接重新生成唯一id
+                  const linksWithNewIds = importedData.links.map((link: any) => ({
+                    ...link,
+                    id: Date.now().toString()
+                  }))
+                  setLinks(linksWithNewIds)
                 }
                 if (Array.isArray(importedData.notes)) {
-                  setNotes(importedData.notes)
+                  // 为备忘录重新生成唯一id
+                  const notesWithNewIds = importedData.notes.map((note: any) => ({
+                    ...note,
+                    id: Date.now().toString()
+                  }))
+                  setNotes(notesWithNewIds)
+                }
+              } else {
+                // 合并模式
+                if (Array.isArray(importedData.links)) {
+                  // 合并链接数据，以url为唯一标识
+                  const mergedLinks = [...links]
+                  importedData.links.forEach((importedLink: any) => {
+                    const existingIndex = mergedLinks.findIndex(link => link.url === importedLink.url)
+                    if (existingIndex !== -1) {
+                      // 存在相同url的链接，以原来的数据为准，合并tags字段
+                      const existingLink = mergedLinks[existingIndex]
+                      // 合并tags，去重
+                      const mergedTags = [...new Set([...existingLink.tags, ...importedLink.tags])]
+                      mergedLinks[existingIndex] = {
+                        ...existingLink,
+                        tags: mergedTags
+                      }
+                    } else {
+                      // 不存在相同url的链接，添加新链接并生成唯一id
+                      mergedLinks.push({
+                        ...importedLink,
+                        id: Date.now().toString()
+                      })
+                    }
+                  })
+                  
+                  setLinks(mergedLinks)
+                }
+                
+                if (Array.isArray(importedData.notes)) {
+                  // 合并备忘录数据，以title为唯一标识
+                  const mergedNotes = [...notes]
+                  importedData.notes.forEach((importedNote: any) => {
+                    const existingIndex = mergedNotes.findIndex(note => note.title === importedNote.title)
+                    if (existingIndex !== -1) {
+                      // 存在相同title的备忘录，以原来的数据为准，合并content和tasks字段
+                      const existingNote = mergedNotes[existingIndex]
+                      // 合并content
+                      const mergedContent = existingNote.content + '\n\n' + importedNote.content
+                      // 合并tasks，以text为唯一标识
+                      const existingTasks = existingNote.tasks || []
+                      const importedTasks = importedNote.tasks || []
+                      const mergedTasks = [...existingTasks]
+                       
+                      importedTasks.forEach((importedTask: any) => {
+                        const existingTaskIndex = mergedTasks.findIndex(task => task.text === importedTask.text)
+                        if (existingTaskIndex === -1) {
+                          // 不存在相同text的任务，添加新任务
+                          mergedTasks.push(importedTask)
+                        }
+                      })
+                       
+                      mergedNotes[existingIndex] = {
+                        ...existingNote,
+                        content: mergedContent,
+                        tasks: mergedTasks.length > 0 ? mergedTasks : undefined
+                      }
+                    } else {
+                      // 不存在相同title的备忘录，添加新备忘录并生成唯一id
+                      mergedNotes.push({
+                        ...importedNote,
+                        id: Date.now().toString()
+                      })
+                    }
+                  })
+                  setNotes(mergedNotes)
                 }
               }
             } else if (Array.isArray(importedData)) {
@@ -408,8 +488,39 @@ const App: React.FC = () => {
                 Array.isArray(item.tags)
               )
               if (isValid) {
-                if (window.confirm('确定要导入链接数据吗？这将覆盖当前的所有链接。')) {
-                  setLinks(importedData)
+                // 询问用户是覆盖还是合并导入
+                const importOption = window.confirm('请选择导入方式：\n点击确定 - 覆盖当前链接数据\n点击取消 - 合并导入链接数据（避免重复）')
+                
+                if (importOption) {
+                  // 覆盖模式，为链接重新生成唯一id
+                  const linksWithNewIds = importedData.map((link: any) => ({
+                    ...link,
+                    id: Date.now().toString()
+                  }))
+                  setLinks(linksWithNewIds)
+                } else {
+                  // 合并模式
+                  const mergedLinks = [...links]
+                  importedData.forEach((importedLink: any) => {
+                    const existingIndex = mergedLinks.findIndex(link => link.url === importedLink.url)
+                    if (existingIndex !== -1) {
+                      // 存在相同url的链接，以原来的数据为准，合并tags字段
+                      const existingLink = mergedLinks[existingIndex]
+                      // 合并tags，去重
+                      const mergedTags = [...new Set([...existingLink.tags, ...importedLink.tags])]
+                      mergedLinks[existingIndex] = {
+                        ...existingLink,
+                        tags: mergedTags
+                      }
+                    } else {
+                      // 不存在相同url的链接，添加新链接并生成唯一id
+                      mergedLinks.push({
+                        ...importedLink,
+                        id: Date.now().toString()
+                      })
+                    }
+                  })
+                  setLinks(mergedLinks)
                 }
               } else {
                 alert('导入的数据格式不正确，请确保是有效的链接数据。')
