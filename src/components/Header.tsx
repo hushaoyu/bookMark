@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import styles from '../styles/components/header.module.css'
 
 interface HeaderProps {
@@ -28,6 +28,24 @@ const Header: React.FC<HeaderProps> = ({
   handleImportData,
   handleOpenSettings
 }) => {
+  const menuContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen, setIsMenuOpen])
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
@@ -45,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({
               + 添加备忘录
             </button>
           )}
-          <div className={styles.menuButtonContainer}>
+          <div className={styles.menuButtonContainer} ref={menuContainerRef}>
             <button className={styles.menuButton} onClick={() => setIsMenuOpen(!isMenuOpen)}>
               ☰
             </button>
