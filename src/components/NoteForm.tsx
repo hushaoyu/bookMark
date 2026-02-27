@@ -118,10 +118,74 @@ const NoteForm: React.FC<NoteFormProps> = ({
     }, 0)
   }
 
+  // 处理键盘事件，实现编号列表和项目符号自动延续
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      const textarea = textareaRef.current
+      if (!textarea) return
+
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+
+      // 查找当前行的开始位置
+      let lineStart = start
+      while (lineStart > 0 && content[lineStart - 1] !== '\n') {
+        lineStart--
+      }
+
+      // 查找当前行的结束位置
+      let lineEnd = start
+      while (lineEnd < content.length && content[lineEnd] !== '\n') {
+        lineEnd++
+      }
+
+      // 获取当前行文本
+      const currentLine = content.substring(lineStart, lineEnd)
+
+      // 检查是否是编号列表行（格式：数字. 开头）
+      const numberListMatch = currentLine.match(/^(\d+)\.\s/)
+      if (numberListMatch) {
+        e.preventDefault()
+        const currentNumber = parseInt(numberListMatch[1])
+        const nextNumber = currentNumber + 1
+        const indent = currentLine.substring(0, numberListMatch.index)
+        const newLine = `\n${indent}${nextNumber}. `
+
+        // 插入新行和编号
+        const beforeSelection = content.substring(0, end)
+        const afterSelection = content.substring(end)
+        setContent(beforeSelection + newLine + afterSelection)
+
+        // 重新聚焦并设置光标位置
+        setTimeout(() => {
+          textarea.focus()
+          textarea.setSelectionRange(end + newLine.length, end + newLine.length)
+        }, 0)
+      } 
+      // 检查是否是项目符号行（格式：- 开头）
+      else if (currentLine.match(/^-\s/)) {
+        e.preventDefault()
+        const indent = currentLine.match(/^(\s*)-\s/)?.[1] || ''
+        const newLine = `\n${indent}- `
+
+        // 插入新行和项目符号
+        const beforeSelection = content.substring(0, end)
+        const afterSelection = content.substring(end)
+        setContent(beforeSelection + newLine + afterSelection)
+
+        // 重新聚焦并设置光标位置
+        setTimeout(() => {
+          textarea.focus()
+          textarea.setSelectionRange(end + newLine.length, end + newLine.length)
+        }, 0)
+      }
+    }
+  }
+
   // 提交表单
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !content.trim()) return
+    if (!title.trim()) return
 
     // 净化输入，防止XSS攻击
     const sanitizedTitle = sanitizeHtml(title)
@@ -223,9 +287,9 @@ const NoteForm: React.FC<NoteFormProps> = ({
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="请输入备忘录内容"
+          onKeyDown={(e) => handleKeyDown(e)}
+          placeholder="请输入备忘录内容（可选）"
           rows={8}
-          required
         />
       </div>
 
