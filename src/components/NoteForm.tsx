@@ -246,14 +246,14 @@ const NoteForm: React.FC<NoteFormProps> = ({
       </div>
 
       <div className={styles.formActions}>
-        <button type="submit" className={styles.btnPrimary}>
-          {editingNote ? '更新' : '添加'}
-        </button>
         {editingNote && (
           <button type="button" className={styles.btnSecondary} onClick={onCancelEdit}>
             取消
           </button>
         )}
+        <button type="submit" className={styles.btnPrimary}>
+          {editingNote ? '更新' : '添加'}
+        </button>
       </div>
     </form>
   )

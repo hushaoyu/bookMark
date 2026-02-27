@@ -166,14 +166,14 @@ const LinkForm: React.FC<LinkFormProps> = ({
       </div>
 
       <div className={styles.formActions}>
-        <button type="submit" className={styles.btnPrimary}>
-          {editingLink ? '更新' : '添加'}
-        </button>
         {editingLink && (
           <button type="button" className={styles.btnSecondary} onClick={onCancelEdit}>
             取消
           </button>
         )}
+        <button type="submit" className={styles.btnPrimary}>
+          {editingLink ? '更新' : '添加'}
+        </button>
       </div>
     </form>
   )
