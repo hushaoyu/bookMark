@@ -27,7 +27,7 @@ export interface VerifyOptions {
 // WebAuthn 服务类
 class WebAuthnService {
   private readonly CREDENTIALS_KEY = 'webauthn_credentials'
-  private readonly RP_NAME = '链接管理器'
+  private readonly RP_NAME = '个人工具'
 
   /**
    * 检查浏览器是否支持 WebAuthn

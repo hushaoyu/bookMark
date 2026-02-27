@@ -24,9 +24,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'pwa-192x192.svg', 'pwa-512x512.svg'],
       manifest: {
-        name: '链接管理器',
-        short_name: '链接管理',
-        description: '一个用于收纳管理链接的PWA应用',
+        name: '个人工具',
+        short_name: '个人工具',
+        description: '一个用于收纳管理个人工具的PWA应用',
         theme_color: '#ffffff',
         icons: [
           {

@@ -1,0 +1,105 @@
+.container {
+  width: 100%;
+  padding: 0 0 12px;
+}
+
+.display {
+  text-align: center;
+  padding: 0 20px;
+}
+
+.expenseAmount {
+  font-size: 24px;
+  font-weight: bold;
+  color: #F44336;
+}
+
+.incomeAmount {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 0 12px;
+}
+
+.row {
+  display: contents;
+}
+
+.key {
+  width: 100%;
+  height: 42px;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.key:hover {
+  background-color: #e0e0e0;
+}
+
+.key:active {
+  background-color: #d0d0d0;
+}
+
+.deleteKey {
+  font-size: 18px;
+}
+
+.saveKey {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  gap: 10px;
+}
+
+.clearButton {
+  flex: 1;
+  height: 48px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 18px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clearButton:hover {
+  background-color: #f5f5f5;
+}
+
+.saveButton {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.saveButton:hover {
+  background-color: #45a049;
+}
+
+.saveButton:active {
+  background-color: #3d8b40;
+}

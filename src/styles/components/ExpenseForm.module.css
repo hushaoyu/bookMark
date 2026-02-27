@@ -1,0 +1,122 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.categorySelectorContainer {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottomContainer {
+  width: 100%;
+  background-color: #fff;
+  padding-top: 12px;
+}
+
+/* 隐藏滚动条但保留滚动功能 */
+.categorySelectorContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.categorySelectorContainer {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.closeButton {
+  font-size: 32px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.typeSelector {
+  display: flex;
+  gap: 20px;
+}
+
+.typeButton {
+  border: none;
+  background: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.typeButton.active {
+  color: #4CAF50;
+  background-color: #e8f5e8;
+}
+
+.moreButton {
+  font-size: 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.inputRow {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.description {
+  flex: 2;
+}
+
+.description input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+.description input::placeholder {
+  color: #999;
+}
+
+.dateSelector {
+  flex: 1;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+}
+
+.keyboardWrapper {
+  width: 100%;
+}

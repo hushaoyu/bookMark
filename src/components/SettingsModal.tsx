@@ -187,7 +187,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className={styles.settingInfo}>
                 <label className={styles.settingLabel}>版本信息</label>
                 <p className={styles.settingDescription}>
-                  链接管理器 PWA v1.0.0
+                  个人工具 PWA v1.0.0
                 </p>
               </div>
             </div>

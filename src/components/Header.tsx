@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import styles from '../styles/components/header.module.css'
 
 interface HeaderProps {
-  activePage: 'list' | 'stats' | 'notes'
+  activePage: 'expense' | 'list' | 'notes'
   isMenuOpen: boolean
   passwordSet: boolean
   handleAddLink: () => void
   handleOpenAddNoteModal: () => void
   setIsMenuOpen: (open: boolean) => void
-  handleSwitchPage: (page: 'list' | 'stats' | 'notes') => void
+  handleSwitchPage: (page: 'expense' | 'list' | 'notes') => void
   handleOpenPasswordSetting: () => void
   handleExportData: () => void
   handleImportData: () => void
@@ -50,8 +50,8 @@ const Header: React.FC<HeaderProps> = ({
     <header className={styles.header}>
       <div className={styles.headerContent}>
         <h1 className={styles.headerTitle}>
-          {activePage === 'list' ? '链接管理器' : activePage === 'notes' ? '备忘录' : '统计分析'}
-        </h1>
+            {activePage === 'list' ? '链接管理器' : activePage === 'notes' ? '备忘录' : '记账本'}
+          </h1>
         <div className={styles.headerActions}>
           {activePage === 'list' && (
             <button className={styles.btnPrimary} onClick={handleAddLink}>
@@ -82,11 +82,12 @@ const Header: React.FC<HeaderProps> = ({
                   📝 备忘录
                 </button>
                 <button
-                  className={`${styles.menuItem} ${activePage === 'stats' ? styles.active : ''}`}
-                  onClick={() => handleSwitchPage('stats')}
+                  className={`${styles.menuItem} ${activePage === 'expense' ? styles.active : ''}`}
+                  onClick={() => handleSwitchPage('expense')}
                 >
-                  📊 统计分析
+                  📒 记账本
                 </button>
+
                 <button
                   className={styles.menuItem}
                   onClick={handleOpenSettings}

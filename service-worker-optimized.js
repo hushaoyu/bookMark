@@ -198,7 +198,7 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-      self.registration.showNotification('链接管理器', options)
+      self.registration.showNotification('个人工具', options)
     );
   }
 });

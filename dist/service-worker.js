@@ -123,7 +123,7 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-      self.registration.showNotification(data.title || '链接管理器', options)
+      self.registration.showNotification(data.title || '个人工具', options)
     );
   } catch (error) {
     console.error('Service Worker: 推送通知处理失败:', error);
