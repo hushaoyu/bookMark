@@ -1,7 +1,7 @@
 {
-  "name": "链接管理器",
-  "short_name": "链接管理",
-  "description": "一个用于收纳管理链接的PWA应用",
+  "name": "个人工具",
+  "short_name": "个人工具",
+  "description": "一个用于收纳管理个人工具的PWA应用",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
