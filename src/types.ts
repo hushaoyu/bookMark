@@ -32,3 +32,20 @@ export interface NoteCategory {
   color: string
   icon: string
 }
+
+// 验证优先级类型
+export type AuthPriority = 'none' | 'password' | 'biometric' | 'both'
+
+// 验证配置类型
+export interface AuthConfig {
+  // 是否启用验证
+  enabled: boolean
+  // 验证优先级
+  priority: AuthPriority
+  // 是否已设置密码
+  passwordSet?: boolean
+  // 是否已注册生物识别
+  biometricRegistered: boolean
+  // 最后验证时间
+  lastVerifiedAt?: number
+}

@@ -12,6 +12,7 @@ interface SettingsModalProps {
   onToggleAutoCheckUpdate: (enabled: boolean) => void
   onCheckForUpdate: () => void
   isChecking: boolean
+  onOpenAuthSettings: () => void
 }
 
 /**
@@ -24,7 +25,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onToggleAutoCheckUpdate,
   onCheckForUpdate,
-  isChecking
+  isChecking,
+  onOpenAuthSettings
 }) => {
   const [cacheSize, setCacheSize] = useState<string>('0 B');
   const [cacheItems, setCacheItems] = useState<CacheItemInfo[]>([]);
@@ -157,6 +159,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={handleClearCache}
               >
                 清除缓存
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingSection}>
+            <h3 className={styles.settingSectionTitle}>安全设置</h3>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>验证设置</label>
+                <p className={styles.settingDescription}>
+                  配置应用的身份验证方式，包括密码和生物识别
+                </p>
+              </div>
+              <button
+                className={styles.btnPrimary}
+                onClick={onOpenAuthSettings}
+              >
+                管理验证
               </button>
             </div>
           </div>

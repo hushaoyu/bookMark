@@ -6,6 +6,7 @@ import PasswordModal from './components/PasswordModal'
 import CustomSelect from './components/CustomSelect'
 import UpdateChecker from './components/UpdateChecker'
 import SettingsModal from './components/SettingsModal'
+import AuthSettings from './components/AuthSettings'
 import useUpdateChecker from './hooks/useUpdateChecker'
 
 // 代码分割
@@ -14,7 +15,7 @@ const LinkList = lazy(() => import('./components/LinkList'))
 const NoteForm = lazy(() => import('./components/NoteForm'))
 const NoteList = lazy(() => import('./components/NoteList'))
 
-import { LinkItem, NoteItem } from './types'
+import { LinkItem, NoteItem, AuthConfig } from './types'
 import useLocalStorage from './hooks/useIncrementalStorage'
 import { 
   generateSalt, 
@@ -43,6 +44,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activePage, setActivePage] = useState<'list' | 'stats' | 'notes'>('list')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isAuthSettingsOpen, setIsAuthSettingsOpen] = useState(false)
 
   // 备忘录分类
   const [noteCategories] = useState<string[]>(['默认', '工作', '学习', '生活', '娱乐', '重要', '其他'])
@@ -240,19 +242,51 @@ const App: React.FC = () => {
   const [newPassword, setNewPassword] = useState<string>('')
   const [passwordConfirm, setPasswordConfirm] = useState<string>('')
   const [passwordError, setPasswordError] = useState<string>('')
+  
+  // 验证配置状态
+  const [authConfig, setAuthConfig] = useState<AuthConfig>(() => {
+    const savedConfig = localStorage.getItem('authConfig')
+    const parsedConfig = savedConfig ? JSON.parse(savedConfig) : null
+    return parsedConfig ? {
+      enabled: parsedConfig.enabled,
+      priority: parsedConfig.priority,
+      biometricRegistered: parsedConfig.biometricRegistered,
+      passwordSet: parsedConfig.passwordSet
+    } : {
+      enabled: true,
+      priority: 'both',
+      biometricRegistered: false
+    }
+  })
 
   // 检查是否设置了密码
   useEffect(() => {
     const hasPassword = localStorage.getItem('password')
     setPasswordSet(!!hasPassword)
-    if (hasPassword) {
-      // 如果设置了密码，打开验证弹框
+    if (hasPassword && authConfig.enabled) {
+      // 如果设置了密码且验证已启用，打开验证弹框
       setIsPasswordVerifyOpen(true)
     } else {
-      // 未设置密码，直接认证通过
+      // 未设置密码或验证未启用，直接认证通过
       setIsAuthenticated(true)
     }
-  }, [])
+  }, [authConfig.enabled])
+  
+  // 保存验证配置到本地存储
+  useEffect(() => {
+    localStorage.setItem('authConfig', JSON.stringify(authConfig))
+  }, [authConfig])
+  
+  // 处理生物识别验证
+  const handleBiometricVerify = () => {
+    setIsAuthenticated(true)
+    setIsPasswordVerifyOpen(false)
+  }
+  
+  // 处理验证配置变更
+  const handleAuthConfigChange = (newConfig: AuthConfig) => {
+    setAuthConfig(newConfig)
+  }
 
   // 打开密码设置弹框
   const handleOpenPasswordSetting = () => {
@@ -673,6 +707,14 @@ const App: React.FC = () => {
                       categories={noteCategories}
                     />
                   </Modal>
+                  
+                  {/* 验证设置弹框 */}
+                  <AuthSettings
+                    isOpen={isAuthSettingsOpen}
+                    onClose={() => setIsAuthSettingsOpen(false)}
+                    config={{ ...authConfig, passwordSet }}
+                    onConfigChange={handleAuthConfigChange}
+                  />
 
                 </>
               </Suspense>
@@ -703,6 +745,8 @@ const App: React.FC = () => {
         handleClearPassword={handleClearPassword}
         handleCloseVerify={() => setIsPasswordVerifyOpen(false)}
         handleCloseSetting={() => setIsPasswordSettingOpen(false)}
+        authConfig={authConfig}
+        onBiometricVerify={handleBiometricVerify}
       />
 
       {/* 设置弹窗 */}
@@ -713,6 +757,10 @@ const App: React.FC = () => {
         onToggleAutoCheckUpdate={toggleAutoCheckUpdate}
         onCheckForUpdate={checkForUpdate}
         isChecking={isChecking}
+        onOpenAuthSettings={() => {
+          setIsSettingsOpen(false)
+          setIsAuthSettingsOpen(true)
+        }}
       />
     </div>
   )
