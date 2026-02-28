@@ -1,30 +1,11 @@
 .container {
   width: 100%;
-  padding: 0 0 12px;
-}
-
-.display {
-  text-align: center;
-  padding: 0 20px;
-}
-
-.expenseAmount {
-  font-size: 24px;
-  font-weight: bold;
-  color: #F44336;
-}
-
-.incomeAmount {
-  font-size: 24px;
-  font-weight: bold;
-  color: #4CAF50;
 }
 
 .keyboard {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  padding: 0 12px;
 }
 
 .row {

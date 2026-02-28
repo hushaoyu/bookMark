@@ -3,6 +3,7 @@ import { expenseService } from '../../services/expense/expenseService';
 import { ExpenseItem } from '../../types/expense/expense';
 import CategorySelector from './CategorySelector';
 import NumericKeyboard from './NumericKeyboard';
+import DatePicker from './DatePicker';
 import styles from '../../styles/components/ExpenseForm.module.css';
 
 interface ExpenseFormProps {
@@ -17,6 +18,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, onSuccess, expense }
   const [amount, setAmount] = useState(expense ? expense.amount.toString() : '');
   const [description, setDescription] = useState(expense?.description || '');
   const [date, setDate] = useState(expense?.date || new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selected, setSelected] = useState(!!expense || true); // 标记是否已选择分类，默认为true因为有默认分类
 
   useEffect(() => {
@@ -78,6 +80,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, onSuccess, expense }
           date,
           description,
           tags: [],
+          paymentMethod: '现金', // 添加默认支付方式
         });
       }
       onSuccess();
@@ -133,22 +136,27 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, onSuccess, expense }
             <div className={styles.description}>
               <input
                 type="text"
-                placeholder="点此输入备注"
+                placeholder="添加备注吧～"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className={styles.dateSelector}>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
               />
             </div>
           </div>
 
           <div className={styles.keyboardWrapper}>
+            <div className={styles.keyboardHeader}>
+              <div 
+                className={styles.dateDisplay}
+                onClick={() => setShowDatePicker(true)}
+              >
+                {date}
+              </div>
+              <div className={styles.amountDisplay}>
+                <span className={type === 'expense' ? styles.expenseAmount : styles.incomeAmount}>
+                  {amount || '0.00'}
+                </span>
+              </div>
+            </div>
             <NumericKeyboard
               value={amount}
               onChange={setAmount}
@@ -158,6 +166,14 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, onSuccess, expense }
             />
           </div>
         </div>
+      )}
+
+      {showDatePicker && (
+        <DatePicker
+          selectedDate={date}
+          onSelect={setDate}
+          onClose={() => setShowDatePicker(false)}
+        />
       )}
     </div>
   );

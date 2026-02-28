@@ -6,6 +6,7 @@ export interface ExpenseItem {
   type: 'income' | 'expense';
   date: string;
   description: string;
+  paymentMethod: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;

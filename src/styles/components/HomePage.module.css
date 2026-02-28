@@ -2,13 +2,15 @@
   width: 100%;
   min-height: 100vh;
   background-color: #f5f5f5;
+  padding-bottom: 60px;
+  box-sizing: border-box;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .title {
@@ -17,25 +19,33 @@
   color: #333;
 }
 
-.dateContainer {
+.expenseSummaryLabel {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px 0x 0;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 10px;
-  position: relative;
+  gap: 6px;
+  text-align: left;
 }
 
-.date {
-  font-size: 16px;
-  color: #666;
-  min-width: 80px;
-  text-align: center;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
+.expenseSummaryLabel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.date:hover {
-  background-color: #f0f0f0;
+.dropdownIcon {
+  font-size: 12px;
+  margin-left: 4px;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.expenseSummaryLabel:hover .dropdownIcon {
+  transform: rotate(180deg);
 }
 
 .monthPicker {
@@ -44,42 +54,40 @@
   left: 0;
   right: 0;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 100;
   margin-top: 8px;
+  overflow: hidden;
 }
 
 .monthPickerHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px;
+  background-color: #1976d2;
+  color: white;
 }
 
 .monthPickerHeader span {
-  font-weight: 600;
-  color: #333;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 .monthPickerClose {
   background: none;
   border: none;
-  font-size: 20px;
-  color: #666;
+  font-size: 24px;
+  color: white;
   cursor: pointer;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
 .monthPickerClose:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .monthPickerContent {
@@ -87,61 +95,60 @@
   overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 12px;
+  gap: 12px;
+  padding: 16px;
 }
 
 .monthOption {
   background: none;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 8px 12px;
+  border-radius: 8px;
+  padding: 16px 8px;
   font-size: 14px;
-  color: #666;
+  color: #333;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  text-align: center;
 }
 
 .monthOption:hover {
-  background-color: #f5f5f5;
-  border-color: #4CAF50;
+  background-color: #e3f2fd;
+  border-color: #2196F3;
 }
 
 .monthOptionActive {
-  background-color: #4CAF50;
+  background-color: #1976d2;
   color: white;
-  border-color: #4CAF50;
-}
-
-.monthButton {
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #666;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
-}
-
-.monthButton:hover {
-  background-color: #f0f0f0;
+  border-color: #1976d2;
 }
 
 .accountOverview {
-  background-color: #4CAF50;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.accountOverview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 0 100%;
 }
 
 .budgetContainer {
-  margin-bottom: 16px;
-  padding: 15px;
+  margin: 16px 0;
+  padding: 12px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: box-shadow 0.2s ease;
 }
@@ -164,9 +171,32 @@
   color: #333;
 }
 
-.budgetButton {
+.budgetProgress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budgetProgressBar {
+  width: 100px;
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.budgetProgressFill {
+  height: 100%;
+  background-color: #4CAF50;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.budgetProgressText {
+  font-size: 12px;
   color: #666;
-  line-height: normal;
+  min-width: 35px;
+  text-align: right;
 }
 
 .budgetContent {
@@ -192,67 +222,125 @@
   color: #666;
 }
 
-.balance {
-  margin-bottom: 12px;
+.expenseSummary {
+  margin-bottom: 0px;
+  text-align: left;
 }
 
-.balanceLabel {
-  font-size: 12px;
-  opacity: 0.8;
-  margin-bottom: 4px;
-}
-
-.balanceAmount {
-  font-size: 24px;
+.expenseSummaryAmount {
+  font-size: 32px;
   font-weight: bold;
+  line-height: 1;
+  margin-bottom: 6px;
 }
 
 .incomeExpense {
   display: flex;
   justify-content: space-between;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .income,
 .expense {
   flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .incomeLabel,
 .expenseLabel {
   font-size: 12px;
   opacity: 0.8;
-  margin-bottom: 4px;
+  font-weight: 500;
+  margin-right: 6px;
 }
 
 .incomeAmount,
 .expenseAmount {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
+  line-height: 1;
 }
 
-.addButton {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: #4CAF50;
-  color: #fff;
-  border: none;
-  font-size: 32px;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+.balanceSummary {
+  flex: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
 }
 
+.balanceSummaryLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.balanceSummaryAmount {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.addButton {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+  color: white;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -28px;
+}
+
 .addButton:hover {
-  background-color: #45a049;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background-color: #f5f5f5;
+}
+
+.navIcon {
+  font-size: 20px;
+}
+
+.navText {
+  font-size: 12px;
+  color: #666;
 }
 
 .formOverlay {

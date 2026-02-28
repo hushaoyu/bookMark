@@ -14,7 +14,6 @@ const NumericKeyboard: React.FC<NumericKeyboardProps> = ({
   onChange,
   onSave,
   onClear,
-  type,
 }) => {
   const handleKeyPress = (key: string) => {
     if (key === 'delete') {
@@ -49,14 +48,6 @@ const NumericKeyboard: React.FC<NumericKeyboardProps> = ({
     }
   };
 
-  const handleClear = () => {
-    onClear();
-  };
-
-  const handleSave = () => {
-    onSave();
-  };
-
   const keys = [
     ['1', '2', '3', 'delete'],
     ['4', '5', '6', '-'],
@@ -66,11 +57,6 @@ const NumericKeyboard: React.FC<NumericKeyboardProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.display}>
-        <span className={type === 'expense' ? styles.expenseAmount : styles.incomeAmount}>
-          {value || '0.00'}
-        </span>
-      </div>
       <div className={styles.keyboard}>
         {keys.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.row}>
