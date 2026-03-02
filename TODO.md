@@ -1,4 +1,5 @@
+** cmd
+- git subtree push --prefix dist origin gh-pages
+
 - 记账本
-    - 首页：顶部增加日历图标，点击可以查看每天的账单支出情况
-    - 首页：单条账单记录，备注前，增加时间，格式为：12:00
     - 完善统计分析功能，界面设计及功能参考 assetSource 文件夹中的 统计分析_1.png

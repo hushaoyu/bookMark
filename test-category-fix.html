@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分类数据修复测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    h2 {
+      color: #555;
+      font-size: 18px;
+      margin-top: 0;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button.danger {
+      background-color: #f44336;
+    }
+    button.danger:hover {
+      background-color: #da190b;
+    }
+    .info {
+      background-color: #e3f2fd;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      background-color: #ffebee;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      color: #c62828;
+    }
+    .success {
+      background-color: #e8f5e8;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      color: #2e7d32;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 分类数据修复测试</h1>
+
+    <div class="section">
+      <h2>1. 检查当前分类数据</h2>
+      <button onclick="checkCategories()">检查分类数据</button>
+      <div id="categoriesInfo"></div>
+    </div>
+
+    <div class="section">
+      <h2>2. 清空分类数据</h2>
+      <div class="info">
+        此操作将删除所有分类数据，模拟用户手动删除分类的情况
+      </div>
+      <button class="danger" onclick="clearCategories()">清空分类数据</button>
+      <div id="clearInfo"></div>
+    </div>
+
+    <div class="section">
+      <h2>3. 测试自动加载分类</h2>
+      <div class="info">
+        点击此按钮检查分类数据，应该会自动重新加载默认分类
+      </div>
+      <button onclick="testAutoLoad()">测试自动加载</button>
+      <div id="testInfo"></div>
+    </div>
+
+    <div class="section">
+      <h2>4. 重置数据库</h2>
+      <div class="error">
+        ⚠️ <strong>警告：</strong>此操作将删除所有数据，包括记账记录和分类！
+      </div>
+      <button class="danger" onclick="resetDatabase()">重置数据库</button>
+      <div id="resetInfo"></div>
+    </div>
+  </div>
+
+  <script>
+    const DB_NAME = 'expense-tracker-db';
+    const DB_VERSION = 2;
+
+    // 检查分类数据
+    async function checkCategories() {
+      const infoDiv = document.getElementById('categoriesInfo');
+      infoDiv.innerHTML = '<div class="info">正在检查分类数据...</div>';
+
+      try {
+        const db = await openDatabase();
+        const transaction = db.transaction(['categories'], 'readonly');
+        const store = transaction.objectStore('categories');
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+          const categories = request.result;
+          const expenseCategories = categories.filter(c => c.type === 'expense');
+          const incomeCategories = categories.filter(c => c.type === 'income');
+
+          infoDiv.innerHTML = `
+            <div class="success">
+              <div class="stats">
+                <div>总分类数: ${categories.length}</div>
+                <div>支出分类: ${expenseCategories.length}</div>
+                <div>收入分类: ${incomeCategories.length}</div>
+              </div>
+              <h3>支出分类：</h3>
+              <pre>${expenseCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+              <h3>收入分类：</h3>
+              <pre>${incomeCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+            </div>
+          `;
+        };
+
+        request.onerror = () => {
+          infoDiv.innerHTML = `<div class="error">❌ 加载分类失败：${request.error}</div>`;
+        };
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 检查过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 清空分类数据
+    async function clearCategories() {
+      const infoDiv = document.getElementById('clearInfo');
+      infoDiv.innerHTML = '<div class="info">正在清空分类数据...</div>';
+
+      try {
+        const db = await openDatabase();
+        const transaction = db.transaction(['categories'], 'readwrite');
+        const store = transaction.objectStore('categories');
+        const request = store.clear();
+
+        request.onsuccess = () => {
+          infoDiv.innerHTML = '<div class="success">✅ 分类数据已清空</div>';
+        };
+
+        request.onerror = () => {
+          infoDiv.innerHTML = `<div class="error">❌ 清空分类失败：${request.error}</div>`;
+        };
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 清空过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 测试自动加载分类
+    async function testAutoLoad() {
+      const infoDiv = document.getElementById('testInfo');
+      infoDiv.innerHTML = '<div class="info">正在测试自动加载分类...</div>';
+
+      try {
+        // 模拟应用程序调用 getAllCategories()
+        const categories = await getAllCategories();
+        const expenseCategories = categories.filter(c => c.type === 'expense');
+        const incomeCategories = categories.filter(c => c.type === 'income');
+
+        infoDiv.innerHTML = `
+          <div class="success">
+            <div class="stats">
+              <div>总分类数: ${categories.length}</div>
+              <div>支出分类: ${expenseCategories.length}</div>
+              <div>收入分类: ${incomeCategories.length}</div>
+            </div>
+            <h3>支出分类：</h3>
+            <pre>${expenseCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+            <h3>收入分类：</h3>
+            <pre>${incomeCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+            <div class="info">✅ 自动加载分类成功！</div>
+          </div>
+        `;
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 测试过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 重置数据库
+    async function resetDatabase() {
+      if (!confirm('确定要重置数据库吗？这将删除所有数据！')) {
+        return;
+      }
+
+      const infoDiv = document.getElementById('resetInfo');
+      infoDiv.innerHTML = '<div class="info">正在重置数据库...</div>';
+
+      try {
+        await new Promise((resolve, reject) => {
+          const request = indexedDB.deleteDatabase(DB_NAME);
+          request.onsuccess = () => {
+            resolve(null);
+          };
+          request.onerror = () => {
+            reject(new Error('删除数据库失败'));
+          };
+        });
+
+        infoDiv.innerHTML = '<div class="success">✅ 数据库已重置</div>';
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 重置过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 打开数据库
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = () => {
+          reject(new Error('数据库打开失败'));
+        };
+
+        request.onsuccess = () => {
+          resolve(request.result);
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+
+          // 创建记账记录表
+          if (!db.objectStoreNames.contains('expenses')) {
+            const expenseStore = db.createObjectStore('expenses', { keyPath: 'id' });
+            expenseStore.createIndex('type', 'type');
+            expenseStore.createIndex('category', 'category');
+            expenseStore.createIndex('date', 'date');
+            expenseStore.createIndex('createdAt', 'createdAt');
+          }
+
+          // 创建分类表
+          if (!db.objectStoreNames.contains('categories')) {
+            const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
+            categoryStore.createIndex('type', 'type');
+            categoryStore.createIndex('order', 'order');
+          }
+
+          // 创建预算表
+          if (!db.objectStoreNames.contains('budgets')) {
+            const budgetStore = db.createObjectStore('budgets', { keyPath: 'id' });
+            budgetStore.createIndex('categoryId', 'categoryId');
+            budgetStore.createIndex('period', 'period');
+            budgetStore.createIndex('startDate', 'startDate');
+            budgetStore.createIndex('endDate', 'endDate');
+          }
+        };
+      });
+    }
+
+    // 模拟 getAllCategories 方法
+    async function getAllCategories() {
+      const db = await openDatabase();
+      
+      // 先获取分类数据
+      const categories = await new Promise((resolve, reject) => {
+        const transaction = db.transaction(['categories'], 'readonly');
+        const store = transaction.objectStore('categories');
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+          resolve(request.result);
+        };
+
+        request.onerror = () => {
+          reject(new Error('获取分类失败'));
+        };
+      });
+
+      // 如果分类数据为空，自动重新加载默认分类
+      if (categories.length === 0) {
+        await refreshCategories(db);
+        return await new Promise((resolve, reject) => {
+          const transaction = db.transaction(['categories'], 'readonly');
+          const store = transaction.objectStore('categories');
+          const request = store.getAll();
+
+          request.onsuccess = () => {
+            resolve(request.result);
+          };
+
+          request.onerror = () => {
+            reject(new Error('获取分类失败'));
+          };
+        });
+      }
+
+      return categories;
+    }
+
+    // 模拟 refreshCategories 方法
+    async function refreshCategories(db) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['categories', 'expenses'], 'readwrite');
+        const categoryStore = transaction.objectStore('categories');
+        const expenseStore = transaction.objectStore('expenses');
+
+        // 1. 清空旧分类数据
+        const clearRequest = categoryStore.clear();
+        clearRequest.onsuccess = () => {
+          // 2. 写入新的分类数据
+          const defaultCategories = [
+            // 支出分类
+            { id: 'food', name: '餐饮', type: 'expense', color: '#FF6B6B', icon: '🍜', order: 1 },
+            { id: 'transport', name: '交通', type: 'expense', color: '#118AB2', icon: '🚗', order: 2 },
+            { id: 'shopping', name: '购物', type: 'expense', color: '#8338EC', icon: '🛒', order: 3 },
+            { id: 'clothes', name: '服饰', type: 'expense', color: '#06D6A0', icon: '👔', order: 4 },
+            { id: 'entertainment', name: '娱乐', type: 'expense', color: '#7B2CBF', icon: '🎮', order: 5 },
+            { id: 'redpacket', name: '红包', type: 'expense', color: '#FF006E', icon: '🧧', order: 6 },
+            { id: 'utilities', name: '水电', type: 'expense', color: '#00BBF9', icon: '💧', order: 7 },
+            { id: 'smoke', name: '烟酒', type: 'expense', color: '#3A86FF', icon: '🚬', order: 8 },
+            { id: 'fruit', name: '水果', type: 'expense', color: '#FFD166', icon: '🍎', order: 9 },
+            { id: 'daily', name: '日用品', type: 'expense', color: '#6A0572', icon: '🧺', order: 10 },
+            // 收入分类
+            { id: 'salary', name: '工资', type: 'income', color: '#4CAF50', icon: '💼', order: 1 },
+            { id: 'bonus', name: '生活费', type: 'income', color: '#8BC34A', icon: '💰', order: 2 },
+            { id: 'redpacket_income', name: '红包', type: 'income', color: '#CDDC39', icon: '🧧', order: 3 },
+            { id: 'food_income', name: '外卖', type: 'income', color: '#FFEB3B', icon: '🍔', order: 4 },
+            { id: 'investment', name: '股票基金', type: 'income', color: '#FFC107', icon: '📈', order: 5 },
+            { id: 'other_income', name: '其它', type: 'income', color: '#FF9800', icon: '💡', order: 6 },
+          ];
+
+          defaultCategories.forEach(category => {
+            categoryStore.put(category);
+          });
+        };
+
+        // 3. 更新所有记账记录中的分类ID
+        const getAllExpensesRequest = expenseStore.getAll();
+        getAllExpensesRequest.onsuccess = () => {
+          const expenses = getAllExpensesRequest.result;
+          let updatedCount = 0;
+
+          const CATEGORY_MIGRATION_MAP = {
+            'snack': 'food',
+            'car': 'transport',
+            'gift': 'redpacket',
+          };
+
+          expenses.forEach(expense => {
+            const newCategoryId = CATEGORY_MIGRATION_MAP[expense.categoryId];
+            if (newCategoryId) {
+              expense.categoryId = newCategoryId;
+              expenseStore.put(expense);
+              updatedCount++;
+            }
+          });
+
+          console.log(`已更新 ${updatedCount} 条记账记录的分类`);
+        };
+
+        transaction.oncomplete = () => {
+          resolve();
+        };
+
+        transaction.onerror = () => {
+          reject(new Error('分类更新失败'));
+        };
+      });
+    }
+  </script>
+</body>
+</html>

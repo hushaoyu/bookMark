@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import ExpenseList from './ExpenseList';
 import ExpenseForm from './ExpenseForm';
+import ExpenseList from './ExpenseList';
+import ExpenseDetail from './ExpenseDetail';
 import BudgetForm from './BudgetForm';
 import MonthPicker from './MonthPicker';
+import CalendarView from './CalendarView';
 import { ExpenseItem, Budget } from '../../types/expense/expense';
 import { expenseService } from '../../services/expense/expenseService';
 import styles from '../../styles/components/HomePage.module.css';
 
 const HomePage: React.FC = () => {
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showExpenseDetail, setShowExpenseDetail] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseItem | null>(null);
   const [refetch, setRefetch] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [monthlyExpense, setMonthlyExpense] = useState(0);
   const [currentBudget, setCurrentBudget] = useState<Budget | null>(null);
@@ -62,8 +67,28 @@ const HomePage: React.FC = () => {
   };
 
   const handleEditExpense = (expense: ExpenseItem) => {
+    setSelectedExpense(expense);
+    setShowExpenseDetail(true);
+  };
+
+  const handleCloseExpenseDetail = () => {
+    setShowExpenseDetail(false);
+    setSelectedExpense(null);
+  };
+
+  const handleEditFromDetail = (expense: ExpenseItem) => {
+    setShowExpenseDetail(false);
     setEditingExpense(expense);
     setShowExpenseForm(true);
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      await expenseService.deleteExpense(expenseId);
+      setRefetch(!refetch); // 触发重新获取数据
+    } catch (error) {
+      console.error('删除记账记录失败:', error);
+    }
   };
 
   const handleCloseForm = () => {
@@ -91,6 +116,11 @@ const HomePage: React.FC = () => {
     setSelectedMonthForDisplay(month);
     setShowMonthPicker(false);
     setRefetch(!refetch);
+  };
+
+  const handleCalendarSelectDate = (_date: string) => {
+    // 可以在这里处理日期选择，比如筛选该日期的账单
+    setShowCalendar(false);
   };
 
   // 格式化月份显示文本
@@ -123,6 +153,13 @@ const HomePage: React.FC = () => {
       <div className={styles.header}>
         <h1 className={styles.title}>日常账本</h1>
         <div className={styles.headerActions}>
+          <button 
+            className={styles.iconButton} 
+            onClick={() => setShowCalendar(true)}
+            title="查看日历"
+          >
+            📅
+          </button>
           <button className={styles.iconButton}>🔍</button>
         </div>
       </div>
@@ -228,6 +265,25 @@ const HomePage: React.FC = () => {
             onClose={handleCloseBudgetForm}
             onSuccess={handleBudgetSuccess}
             budget={currentBudget}
+          />
+        </div>
+      )}
+
+      {showCalendar && (
+        <CalendarView
+          month={selectedMonthForDisplay}
+          onClose={() => setShowCalendar(false)}
+          onSelectDate={handleCalendarSelectDate}
+        />
+      )}
+
+      {showExpenseDetail && selectedExpense && (
+        <div className={styles.detailOverlay}>
+          <ExpenseDetail
+            expense={selectedExpense}
+            onClose={handleCloseExpenseDetail}
+            onEdit={handleEditFromDetail}
+            onDelete={handleDeleteExpense}
           />
         </div>
       )}

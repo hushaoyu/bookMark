@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分类数据更新工具</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+    }
+    .section h2 {
+      color: #555;
+      margin-top: 0;
+      font-size: 18px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #da190b;
+    }
+    button.warning {
+      background: #ff9800;
+    }
+    button.warning:hover {
+      background: #e68900;
+    }
+    .info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .success {
+      background: #c8e6c9;
+      color: #2e7d32;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error {
+      background: #ffcdd2;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .stat-card {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 分类数据更新工具</h1>
+
+    <div class="section">
+      <h2>1. 检查数据库状态</h2>
+      <button onclick="checkDatabase()">检查数据库</button>
+      <div id="dbInfo"></div>
+    </div>
+
+    <div class="section">
+      <h2>2. 更新分类数据</h2>
+      <div class="info">
+        <strong>推荐方式：</strong>点击"刷新分类数据"按钮，会自动更新分类并迁移记账记录
+      </div>
+      <button onclick="refreshCategories()">🔄 刷新分类数据</button>
+      <div id="refreshResult"></div>
+    </div>
+
+    <div class="section">
+      <h2>3. 查看当前分类</h2>
+      <button onclick="showCategories()">📋 查看分类</button>
+      <div id="categoriesInfo"></div>
+    </div>
+
+    <div class="section">
+      <h2>4. 重置数据库（谨慎操作）</h2>
+      <div class="error">
+        ⚠️ <strong>警告：</strong>此操作将删除所有数据，包括记账记录和分类！请确保已备份重要数据。
+      </div>
+      <button class="danger" onclick="resetDatabase()">🗑️ 重置数据库</button>
+      <div id="resetResult"></div>
+    </div>
+  </div>
+
+  <script>
+    const DB_NAME = 'expense-tracker-db';
+    const DB_VERSION = 2;
+
+    // 检查数据库状态
+    async function checkDatabase() {
+      const infoDiv = document.getElementById('dbInfo');
+      infoDiv.innerHTML = '<div class="info">正在检查数据库...</div>';
+
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        // 处理数据库升级（创建对象存储）
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          console.log('数据库升级中...');
+
+          // 创建记账记录表
+          if (!db.objectStoreNames.contains('expenses')) {
+            const expenseStore = db.createObjectStore('expenses', { keyPath: 'id' });
+            expenseStore.createIndex('type', 'type');
+            expenseStore.createIndex('category', 'category');
+            expenseStore.createIndex('date', 'date');
+            expenseStore.createIndex('createdAt', 'createdAt');
+          }
+
+          // 创建分类表
+          if (!db.objectStoreNames.contains('categories')) {
+            const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
+            categoryStore.createIndex('type', 'type');
+            categoryStore.createIndex('order', 'order');
+          }
+
+          // 创建预算表
+          if (!db.objectStoreNames.contains('budgets')) {
+            const budgetStore = db.createObjectStore('budgets', { keyPath: 'id' });
+            budgetStore.createIndex('categoryId', 'categoryId');
+            budgetStore.createIndex('period', 'period');
+            budgetStore.createIndex('startDate', 'startDate');
+            budgetStore.createIndex('endDate', 'endDate');
+          }
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          const version = db.version;
+          const objectStores = Array.from(db.objectStoreNames);
+          
+          db.close();
+          
+          infoDiv.innerHTML = `
+            <div class="success">
+              <strong>数据库状态：</strong><br>
+              数据库名称：${DB_NAME}<br>
+              当前版本：${version}<br>
+              目标版本：${DB_VERSION}<br>
+              对象存储：${objectStores.join(', ') || '无'}<br>
+              ${version < DB_VERSION ? '<span style="color: #ff9800;">⚠️ 数据库需要升级</span>' : '<span style="color: #4CAF50;">✓ 数据库版本正确</span>'}
+            </div>
+          `;
+        };
+
+        request.onerror = (event) => {
+          infoDiv.innerHTML = `<div class="error">❌ 数据库检查失败：${event.target.error}</div>`;
+        };
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 检查过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 刷新分类数据
+    async function refreshCategories() {
+      const resultDiv = document.getElementById('refreshResult');
+      resultDiv.innerHTML = '<div class="info">正在刷新分类数据...</div>';
+
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        // 处理数据库升级（创建对象存储）
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          console.log('数据库升级中...');
+
+          // 创建记账记录表
+          if (!db.objectStoreNames.contains('expenses')) {
+            const expenseStore = db.createObjectStore('expenses', { keyPath: 'id' });
+            expenseStore.createIndex('type', 'type');
+            expenseStore.createIndex('category', 'category');
+            expenseStore.createIndex('date', 'date');
+            expenseStore.createIndex('createdAt', 'createdAt');
+            console.log('创建 expenses 对象存储');
+          }
+
+          // 创建分类表
+          if (!db.objectStoreNames.contains('categories')) {
+            const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
+            categoryStore.createIndex('type', 'type');
+            categoryStore.createIndex('order', 'order');
+            console.log('创建 categories 对象存储');
+          }
+
+          // 创建预算表
+          if (!db.objectStoreNames.contains('budgets')) {
+            const budgetStore = db.createObjectStore('budgets', { keyPath: 'id' });
+            budgetStore.createIndex('categoryId', 'categoryId');
+            budgetStore.createIndex('period', 'period');
+            budgetStore.createIndex('startDate', 'startDate');
+            budgetStore.createIndex('endDate', 'endDate');
+            console.log('创建 budgets 对象存储');
+          }
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          
+          // 检查对象存储是否存在
+          if (!db.objectStoreNames.contains('categories') || !db.objectStoreNames.contains('expenses')) {
+            db.close();
+            resultDiv.innerHTML = `
+              <div class="error">
+                ❌ 数据库缺少必要的对象存储<br>
+                请先点击"重置数据库"按钮，然后刷新页面。
+              </div>
+            `;
+            return;
+          }
+          
+          const transaction = db.transaction(['categories', 'expenses'], 'readwrite');
+          const categoryStore = transaction.objectStore('categories');
+          const expenseStore = transaction.objectStore('expenses');
+
+          // 1. 清空旧分类数据
+          const clearRequest = categoryStore.clear();
+          clearRequest.onsuccess = () => {
+            // 2. 写入新的分类数据
+            const newCategories = [
+              { id: 'food', name: '餐饮', type: 'expense', color: '#FF6B6B', icon: '🍜', order: 1 },
+              { id: 'transport', name: '交通', type: 'expense', color: '#118AB2', icon: '🚗', order: 2 },
+              { id: 'shopping', name: '购物', type: 'expense', color: '#8338EC', icon: '🛒', order: 3 },
+              { id: 'clothes', name: '服饰', type: 'expense', color: '#06D6A0', icon: '👔', order: 4 },
+              { id: 'entertainment', name: '娱乐', type: 'expense', color: '#7B2CBF', icon: '🎮', order: 5 },
+              { id: 'redpacket', name: '红包', type: 'expense', color: '#FF006E', icon: '🧧', order: 6 },
+              { id: 'utilities', name: '水电', type: 'expense', color: '#00BBF9', icon: '💧', order: 7 },
+              { id: 'smoke', name: '烟酒', type: 'expense', color: '#3A86FF', icon: '🚬', order: 8 },
+              { id: 'fruit', name: '水果', type: 'expense', color: '#FFD166', icon: '🍎', order: 9 },
+              { id: 'daily', name: '日用品', type: 'expense', color: '#6A0572', icon: '🧺', order: 10 },
+              { id: 'beauty', name: '美容', type: 'expense', color: '#FC5185', icon: '💄', order: 11 },
+              { id: 'house', name: '住房', type: 'expense', color: '#AB83A1', icon: '🏠', order: 12 },
+              { id: 'communication', name: '通讯', type: 'expense', color: '#4CC9F0', icon: '📱', order: 13 },
+              { id: 'vegetables', name: '蔬菜', type: 'expense', color: '#38B000', icon: '🥬', order: 14 },
+              { id: 'study', name: '学习', type: 'expense', color: '#38B000', icon: '📚', order: 15 },
+              { id: 'travel', name: '旅游', type: 'expense', color: '#073B4C', icon: '✈️', order: 16 },
+              { id: 'sport', name: '运动', type: 'expense', color: '#457B9D', icon: '⚽', order: 17 },
+              { id: 'child', name: '孩子', type: 'expense', color: '#EF476F', icon: '👶', order: 18 },
+              { id: 'pet', name: '宠物', type: 'expense', color: '#FF9F1C', icon: '🐱', order: 19 },
+              { id: 'home', name: '居家', type: 'expense', color: '#9D4EDD', icon: '🏡', order: 20 },
+              { id: 'books', name: '书籍', type: 'expense', color: '#560BAD', icon: '📖', order: 21 },
+              { id: 'repair', name: '维修', type: 'expense', color: '#3F37C9', icon: '🔧', order: 22 },
+              { id: 'medical', name: '医疗', type: 'expense', color: '#4361EE', icon: '💊', order: 23 },
+              { id: 'digital', name: '数码', type: 'expense', color: '#4CC9F0', icon: '💻', order: 24 },
+              { id: 'salary', name: '工资', type: 'income', color: '#4CAF50', icon: '💼', order: 1 },
+              { id: 'bonus', name: '生活费', type: 'income', color: '#8BC34A', icon: '💰', order: 2 },
+              { id: 'redpacket_income', name: '红包', type: 'income', color: '#CDDC39', icon: '🧧', order: 3 },
+              { id: 'food_income', name: '外卖', type: 'income', color: '#FFEB3B', icon: '🍔', order: 4 },
+              { id: 'investment', name: '股票基金', type: 'income', color: '#FFC107', icon: '📈', order: 5 },
+              { id: 'other_income', name: '其它', type: 'income', color: '#FF9800', icon: '💡', order: 6 },
+            ];
+
+            newCategories.forEach(category => {
+              categoryStore.put(category);
+            });
+
+            // 3. 更新所有记账记录中的分类ID
+            const getAllExpensesRequest = expenseStore.getAll();
+            getAllExpensesRequest.onsuccess = () => {
+              const expenses = getAllExpensesRequest.result;
+              const CATEGORY_MIGRATION_MAP = {
+                'snack': 'food',
+                'car': 'transport',
+                'gift': 'redpacket',
+              };
+              
+              let updatedCount = 0;
+              expenses.forEach(expense => {
+                const newCategoryId = CATEGORY_MIGRATION_MAP[expense.categoryId];
+                if (newCategoryId) {
+                  expense.categoryId = newCategoryId;
+                  expenseStore.put(expense);
+                  updatedCount++;
+                }
+              });
+
+              console.log(`已更新 ${updatedCount} 条记账记录的分类`);
+            };
+          };
+
+          transaction.oncomplete = () => {
+            db.close();
+            resultDiv.innerHTML = `
+              <div class="success">
+                ✅ 分类数据刷新成功！<br>
+                请刷新应用页面以查看更新后的分类。
+              </div>
+            `;
+          };
+
+          transaction.onerror = () => {
+            db.close();
+            resultDiv.innerHTML = `<div class="error">❌ 分类数据刷新失败：${transaction.error}</div>`;
+          };
+        };
+
+        request.onerror = (event) => {
+          resultDiv.innerHTML = `<div class="error">❌ 数据库打开失败：${event.target.error}</div>`;
+        };
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">❌ 刷新过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 查看当前分类
+    async function showCategories() {
+      const infoDiv = document.getElementById('categoriesInfo');
+      infoDiv.innerHTML = '<div class="info">正在加载分类数据...</div>';
+
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        // 处理数据库升级（创建对象存储）
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          console.log('数据库升级中...');
+
+          // 创建记账记录表
+          if (!db.objectStoreNames.contains('expenses')) {
+            const expenseStore = db.createObjectStore('expenses', { keyPath: 'id' });
+            expenseStore.createIndex('type', 'type');
+            expenseStore.createIndex('category', 'category');
+            expenseStore.createIndex('date', 'date');
+            expenseStore.createIndex('createdAt', 'createdAt');
+          }
+
+          // 创建分类表
+          if (!db.objectStoreNames.contains('categories')) {
+            const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
+            categoryStore.createIndex('type', 'type');
+            categoryStore.createIndex('order', 'order');
+          }
+
+          // 创建预算表
+          if (!db.objectStoreNames.contains('budgets')) {
+            const budgetStore = db.createObjectStore('budgets', { keyPath: 'id' });
+            budgetStore.createIndex('categoryId', 'categoryId');
+            budgetStore.createIndex('period', 'period');
+            budgetStore.createIndex('startDate', 'startDate');
+            budgetStore.createIndex('endDate', 'endDate');
+          }
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          
+          // 检查对象存储是否存在
+          if (!db.objectStoreNames.contains('categories')) {
+            db.close();
+            infoDiv.innerHTML = `
+              <div class="error">
+                ❌ 数据库缺少 categories 对象存储<br>
+                请先点击"重置数据库"按钮，然后刷新页面。
+              </div>
+            `;
+            return;
+          }
+          
+          const transaction = db.transaction('categories', 'readonly');
+          const store = transaction.objectStore('categories');
+          const getAllRequest = store.getAll();
+
+          getAllRequest.onsuccess = () => {
+            const categories = getAllRequest.result;
+            const expenseCategories = categories.filter(c => c.type === 'expense');
+            const incomeCategories = categories.filter(c => c.type === 'income');
+
+            infoDiv.innerHTML = `
+              <div class="success">
+                <div class="stats">
+                  <div class="stat-card">
+                    <div class="stat-value">${categories.length}</div>
+                    <div class="stat-label">总分类数</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">${expenseCategories.length}</div>
+                    <div class="stat-label">支出分类</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">${incomeCategories.length}</div>
+                    <div class="stat-label">收入分类</div>
+                  </div>
+                </div>
+                <h3>支出分类：</h3>
+                <pre>${expenseCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+                <h3>收入分类：</h3>
+                <pre>${incomeCategories.map(c => `${c.icon} ${c.name} (${c.id})`).join('\n')}</pre>
+              </div>
+            `;
+          };
+
+          getAllRequest.onerror = () => {
+            db.close();
+            infoDiv.innerHTML = `<div class="error">❌ 加载分类失败：${getAllRequest.error}</div>`;
+          };
+        };
+
+        request.onerror = (event) => {
+          infoDiv.innerHTML = `<div class="error">❌ 数据库打开失败：${event.target.error}</div>`;
+        };
+      } catch (error) {
+        infoDiv.innerHTML = `<div class="error">❌ 加载过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 重置数据库
+    async function resetDatabase() {
+      const resultDiv = document.getElementById('resetResult');
+      
+      if (!confirm('确定要删除所有数据吗？此操作不可恢复！')) {
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="info">正在删除数据库...</div>';
+
+      try {
+        const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+        
+        deleteRequest.onsuccess = () => {
+          resultDiv.innerHTML = `
+            <div class="success">
+              ✅ 数据库已成功删除！<br>
+              请刷新应用页面，系统会自动创建新的数据库并初始化分类数据。
+            </div>
+          `;
+        };
+
+        deleteRequest.onerror = (event) => {
+          resultDiv.innerHTML = `<div class="error">❌ 删除数据库失败：${event.target.error}</div>`;
+        };
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">❌ 删除过程中出错：${error.message}</div>`;
+      }
+    }
+
+    // 页面加载时自动检查数据库
+    window.onload = () => {
+      checkDatabase();
+    };
+  </script>
+</body>
+</html>

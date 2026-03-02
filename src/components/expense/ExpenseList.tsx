@@ -50,6 +50,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ onEditExpense, month }) => {
     return `${month}月${day}日 ${weekday}`;
   };
 
+  // 格式化时间为 HH:MM
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   // 按日期分组
   const groupedExpenses = expenses.reduce<Record<string, ExpenseItem[]>>((acc, expense) => {
     const date = expense.date;
@@ -100,7 +108,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ onEditExpense, month }) => {
                         </div>
                         <div className={styles.info}>
                           <div className={styles.category}>{categoryInfo[expense.category]?.name || expense.category}</div>
-                          {expense.description && <div className={styles.description}>{expense.description}</div>}
+                          {(expense.description || expense.createdAt) && (
+                            <div className={styles.description}>
+                              {expense.createdAt && (
+                                <span className={styles.time}>{formatTime(expense.createdAt)}</span>
+                              )}
+                              {expense.description}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className={`${styles.amount} ${styles[expense.type as 'expense' | 'income']}`}>
