@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import styles from '../styles/components/header.module.css'
 
 interface HeaderProps {
-  activePage: 'expense' | 'list' | 'notes'
+  activePage: 'expense' | 'list' | 'notes' | 'statistics'
   isMenuOpen: boolean
   passwordSet: boolean
   handleAddLink: () => void
   handleOpenAddNoteModal: () => void
   setIsMenuOpen: (open: boolean) => void
-  handleSwitchPage: (page: 'expense' | 'list' | 'notes') => void
+  handleSwitchPage: (page: 'expense' | 'list' | 'notes' | 'statistics') => void
   handleOpenPasswordSetting: () => void
   handleExportData: () => void
   handleImportData: () => void
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({
     <header className={styles.header}>
       <div className={styles.headerContent}>
         <h1 className={styles.headerTitle}>
-            {activePage === 'list' ? '链接管理器' : activePage === 'notes' ? '备忘录' : '记账本'}
+            {activePage === 'list' ? '链接管理器' : activePage === 'notes' ? '备忘录' : activePage === 'statistics' ? '统计分析' : '记账本'}
           </h1>
         <div className={styles.headerActions}>
           {activePage === 'list' && (
@@ -86,6 +86,12 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={() => handleSwitchPage('expense')}
                 >
                   📒 记账本
+                </button>
+                <button
+                  className={`${styles.menuItem} ${activePage === 'statistics' ? styles.active : ''}`}
+                  onClick={() => handleSwitchPage('statistics')}
+                >
+                  📊 统计分析
                 </button>
 
                 <button

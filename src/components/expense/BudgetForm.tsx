@@ -122,35 +122,44 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onClose, onSuccess, budget }) =
         <button className={styles.closeButton} onClick={onClose}>×</button>
       </div>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label htmlFor="totalBudget">总预算</label>
-          <input
-            type="number"
-            id="totalBudget"
-            value={totalBudget}
-            onChange={(e) => setTotalBudget(e.target.value)}
-            placeholder="请输入本月总预算"
-            step="0.01"
-            min="0"
-          />
+        <div className={styles.totalBudget}>
+          <div className={styles.formGroup}>
+            <label htmlFor="totalBudget">
+              <span>总预算</span>
+              <span>💰</span>
+            </label>
+            <input
+              type="number"
+              id="totalBudget"
+              value={totalBudget}
+              onChange={(e) => setTotalBudget(e.target.value)}
+              placeholder="请输入本月总预算"
+              step="0.01"
+              min="0"
+            />
+          </div>
         </div>
 
         <div className={styles.categorySection}>
           <h3>分类预算</h3>
-          {categories.map((category) => (
-            <div key={category.id} className={styles.formGroup}>
-              <label htmlFor={`budget-${category.id}`}>{category.name}</label>
-              <input
-                type="number"
-                id={`budget-${category.id}`}
-                value={category.budget}
-                onChange={(e) => handleCategoryBudgetChange(category.id, e.target.value)}
-                placeholder="0"
-                step="0.01"
-                min="0"
-              />
-            </div>
-          ))}
+          <div className={styles.categoryList}>
+            {categories.map((category) => (
+              <div key={category.id} className={styles.categoryItem}>
+                <div className={styles.formGroup}>
+                  <label htmlFor={`budget-${category.id}`}>{category.name}</label>
+                  <input
+                    type="number"
+                    id={`budget-${category.id}`}
+                    value={category.budget}
+                    onChange={(e) => handleCategoryBudgetChange(category.id, e.target.value)}
+                    placeholder="0"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className={styles.buttonGroup}>

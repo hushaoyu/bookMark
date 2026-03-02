@@ -8,6 +8,7 @@ import UpdateChecker from './components/UpdateChecker'
 import SettingsModal from './components/SettingsModal'
 import AuthSettings from './components/AuthSettings'
 import HomePage from './components/expense/HomePage'
+import StatisticsPage from './components/expense/StatisticsPage'
 import useUpdateChecker from './hooks/useUpdateChecker'
 
 // 代码分割
@@ -42,7 +43,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState<'expense' | 'list' | 'notes'>('expense')
+  const [activePage, setActivePage] = useState<'expense' | 'list' | 'notes' | 'statistics'>('expense')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isAuthSettingsOpen, setIsAuthSettingsOpen] = useState(false)
 
@@ -217,10 +218,20 @@ const App: React.FC = () => {
 
 
   // 切换页面
-  const handleSwitchPage = (page: 'expense' | 'list' | 'notes') => {
+  const handleSwitchPage = (page: 'expense' | 'list' | 'notes' | 'statistics') => {
     setActivePage(page)
     setIsMenuOpen(false)
   }
+
+  // 设置全局onSwitchPage方法，供StatisticsPage组件使用
+  useEffect(() => {
+    (window as any).__onSwitchPage = handleSwitchPage;
+    
+    // 清理函数
+    return () => {
+      delete (window as any).__onSwitchPage;
+    };
+  }, []);
 
   // 打开设置弹框
   const handleOpenSettings = () => {
@@ -610,7 +621,7 @@ const App: React.FC = () => {
                 <>
                   <main>
                     {activePage === 'expense' ? (
-                      <HomePage />
+                      <HomePage onSwitchPage={handleSwitchPage} />
                     ) : activePage === 'list' ? (
                       <div className={styles.appContainer}>
                         <div className={styles.searchSortContainer}>
@@ -655,7 +666,7 @@ const App: React.FC = () => {
                           onBatchDelete={handleBatchDelete}
                         />
                       </div>
-                    ) : (
+                    ) : activePage === 'notes' ? (
                       <div className={styles.appContainer}>
                         <NoteList
                           notes={notes}
@@ -665,6 +676,8 @@ const App: React.FC = () => {
                           categories={noteCategories}
                         />
                       </div>
+                    ) : (
+                      <StatisticsPage />
                     )}
                   </main>
                   {/* 添加/编辑链接弹框 */}

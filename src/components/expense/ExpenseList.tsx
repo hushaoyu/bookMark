@@ -68,6 +68,11 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ onEditExpense, month }) => {
     return acc;
   }, {});
 
+  // 对每天内的账单按createdAt字段排序，最新的在前
+  Object.keys(groupedExpenses).forEach(date => {
+    groupedExpenses[date].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  });
+
   // 按日期排序，最新的日期在前
   const sortedDates = Object.keys(groupedExpenses).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 

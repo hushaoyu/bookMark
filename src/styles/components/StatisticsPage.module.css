@@ -1,0 +1,360 @@
+.container {
+  padding-bottom: 100px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 顶部栏样式 */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 0 0 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.backButton:hover {
+  background: #f8f9fa;
+  border-color: #4CAF50;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.typeTabs {
+  display: flex;
+  gap: 4px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 2px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.typeTab {
+  padding: 6px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.typeTab:hover {
+  color: #4CAF50;
+}
+
+.typeTabActive {
+  background: white;
+  color: #4CAF50;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-weight: 600;
+}
+
+.typeTabActive:hover {
+  color: #4CAF50;
+}
+
+/* 筛选器样式 */
+.filterContainer {
+  margin-bottom: 16px;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.filterTab {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 50px;
+  text-align: center;
+}
+
+.filterTab:hover {
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+.filterTabActive {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  border-color: #2196F3;
+  color: white;
+}
+
+.filterTabActive:hover {
+  color: white;
+}
+
+.dateSelector {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 180px;
+}
+
+.dateSelect {
+  flex: 1;
+  padding: 10px 24px 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s ease;
+  min-width: 80px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+}
+
+.dateSelect:focus {
+  border-color: #4CAF50;
+}
+
+/* 统计卡片样式 */
+.statisticsCards {
+  display: flex;
+  background: white;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.statCard {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.statAmount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  word-break: break-all;
+}
+
+/* 图表容器样式 */
+.chartContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.chartLegend {
+  display: flex;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.incomeDot {
+  background-color: #4CAF50;
+}
+
+.expenseDot {
+  background-color: #FF5722;
+}
+
+/* 折线图样式 */
+.lineChart {
+  position: relative;
+}
+
+.chartSvg {
+  width: 100%;
+  height: 200px;
+}
+
+.xAxisLabels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  margin-top: 8px;
+}
+
+.xAxisLabel {
+  font-size: 11px;
+  color: #999;
+  flex: 1;
+  text-align: center;
+}
+
+/* 饼图样式 */
+.pieChartContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pieChart {
+  width: 200px;
+  height: 200px;
+}
+
+.pieSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.pieCenterLabel {
+  font-size: 10px;
+  fill: #999;
+}
+
+.pieCenterValue {
+  font-size: 14px;
+  fill: #333;
+  font-weight: 600;
+}
+
+/* 分类图例样式 */
+.categoryLegend {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoryLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.categoryLegendItem:last-child {
+  border-bottom: none;
+}
+
+.categoryColorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.categoryName {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.categoryPercentage {
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+}
+
+.categoryAmount {
+  font-size: 13px;
+  color: #999;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* 空状态样式 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  font-size: 14px;
+  margin: 0;
+}

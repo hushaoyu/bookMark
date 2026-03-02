@@ -9,7 +9,11 @@ import { ExpenseItem, Budget } from '../../types/expense/expense';
 import { expenseService } from '../../services/expense/expenseService';
 import styles from '../../styles/components/HomePage.module.css';
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  onSwitchPage?: (page: 'expense' | 'list' | 'notes' | 'statistics') => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ onSwitchPage }) => {
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showExpenseDetail, setShowExpenseDetail] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
@@ -232,7 +236,10 @@ const HomePage: React.FC = () => {
           <span className={styles.navIcon}>📋</span>
           <span className={styles.navText}>账单</span>
         </button>
-        <button className={styles.navButton}>
+        <button 
+          className={styles.navButton}
+          onClick={() => onSwitchPage?.('statistics')}
+        >
           <span className={styles.navIcon}>📊</span>
           <span className={styles.navText}>统计</span>
         </button>
