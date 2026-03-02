@@ -600,6 +600,42 @@ const App: React.FC = () => {
                   })
                   setNotes(mergedNotes)
                 }
+                
+                // 记账本数据合并导入
+                if (importedData.expenses || importedData.expenseBudgets) {
+                  try {
+                    // 导入预算数据（合并模式）
+                    if (importedData.expenseBudgets) {
+                      for (const budget of importedData.expenseBudgets) {
+                        await expenseService.createBudget({
+                          amount: budget.amount,
+                          period: budget.period,
+                          categoryId: budget.categoryId,
+                          startDate: budget.startDate,
+                          endDate: budget.endDate
+                        })
+                      }
+                    }
+                    
+                    // 导入记账记录（合并模式）
+                    if (importedData.expenses) {
+                      for (const expense of importedData.expenses) {
+                        await expenseService.createExpense({
+                          amount: expense.amount,
+                          category: expense.category,
+                          type: expense.type,
+                          date: expense.date,
+                          description: expense.description,
+                          paymentMethod: expense.paymentMethod || '现金',
+                          tags: expense.tags || []
+                        })
+                      }
+                    }
+                  } catch (error) {
+                    console.error('导入记账数据失败:', error)
+                    alert('导入记账数据失败，请重试')
+                  }
+                }
               }
             } else if (Array.isArray(importedData)) {
               // 兼容旧格式（只有链接数据）
