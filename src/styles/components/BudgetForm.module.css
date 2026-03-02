@@ -76,6 +76,7 @@
 }
 
 .formGroup input {
+  position: relative;
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #e0e0e0;
@@ -92,6 +93,8 @@
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
   background: white;
 }
+
+
 
 .totalBudget {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);

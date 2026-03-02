@@ -4,7 +4,7 @@ import { expenseService } from '../../services/expense/expenseService';
 import styles from '../../styles/components/StatisticsPage.module.css';
 import { defaultCategories } from '../../utils/expense/defaultCategories';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
 

@@ -54,9 +54,10 @@ const HomePage: React.FC<HomePageProps> = ({ onSwitchPage }) => {
         setMonthlyIncome(income);
         setMonthlyExpense(expense);
 
-        // 获取当月预算
-        const budget = await expenseService.getCurrentMonthBudget();
-        setCurrentBudget(budget);
+        // 获取全局预算
+        const allBudgets = await expenseService.getAllBudgets();
+        const budget = allBudgets.find(b => b.period === 'month' && b.categoryId === null);
+        setCurrentBudget(budget || null);
       } catch (error) {
         console.error('Failed to calculate financial data:', error);
       }
@@ -104,8 +105,11 @@ const HomePage: React.FC<HomePageProps> = ({ onSwitchPage }) => {
     setRefetch(!refetch);
   };
 
-  const handleBudgetSuccess = () => {
-    setRefetch(!refetch);
+  const handleBudgetSuccess = async () => {
+    // 预算设置成功后，重新获取全局预算
+    const allBudgets = await expenseService.getAllBudgets();
+    const budget = allBudgets.find(b => b.period === 'month' && b.categoryId === null);
+    setCurrentBudget(budget || null);
   };
 
   const handleOpenBudgetForm = () => {
@@ -208,7 +212,8 @@ const HomePage: React.FC<HomePageProps> = ({ onSwitchPage }) => {
               <div 
                 className={styles.budgetProgressFill} 
                 style={{ 
-                  width: currentBudget ? `${Math.min((monthlyExpense / currentBudget.amount) * 100, 100)}%` : '0%' 
+                  width: currentBudget ? `${Math.min((monthlyExpense / currentBudget.amount) * 100, 100)}%` : '0%',
+                  backgroundColor: currentBudget && monthlyExpense > currentBudget.amount ? '#ff4444' : '#4CAF50'
                 }}
               />
             </div>
@@ -272,6 +277,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSwitchPage }) => {
             onClose={handleCloseBudgetForm}
             onSuccess={handleBudgetSuccess}
             budget={currentBudget}
+            month={selectedMonthForDisplay}
           />
         </div>
       )}
