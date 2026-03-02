@@ -1,5 +1,6 @@
 import { ExpenseItem, Budget, ExpenseCategory } from '../../types/expense/expense';
 import { expenseStorageService } from './storageService';
+import { defaultCategories } from '../../utils/expense/defaultCategories';
 
 class ExpenseService {
   // 创建记账记录
@@ -111,12 +112,10 @@ class ExpenseService {
   // 导出数据
   async exportData(): Promise<string> {
     const expenses = await this.getAllExpenses();
-    const categories = await expenseStorageService.getAllCategories();
     const budgets = await expenseStorageService.getAllBudgets();
 
     const data = {
       expenses,
-      categories,
       budgets,
       exportDate: new Date().toISOString(),
     };
@@ -126,20 +125,13 @@ class ExpenseService {
 
   // 分类相关方法
   async getAllCategories(): Promise<ExpenseCategory[]> {
-    return await expenseStorageService.getAllCategories();
+    return defaultCategories;
   }
 
   // 导入数据
   async importData(json: string): Promise<void> {
     try {
       const data = JSON.parse(json);
-
-      // 导入分类
-      if (data.categories && Array.isArray(data.categories)) {
-        for (const category of data.categories) {
-          await expenseStorageService.addCategory(category);
-        }
-      }
 
       // 导入预算
       if (data.budgets && Array.isArray(data.budgets)) {

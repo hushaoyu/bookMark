@@ -13,6 +13,7 @@ interface SettingsModalProps {
   onCheckForUpdate: () => void
   isChecking: boolean
   onOpenAuthSettings: () => void
+  onExportData: () => void
 }
 
 /**
@@ -26,7 +27,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onToggleAutoCheckUpdate,
   onCheckForUpdate,
   isChecking,
-  onOpenAuthSettings
+  onOpenAuthSettings,
+  onExportData
 }) => {
   const [cacheSize, setCacheSize] = useState<string>('0 B');
   const [cacheItems, setCacheItems] = useState<CacheItemInfo[]>([]);
@@ -177,6 +179,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={onOpenAuthSettings}
               >
                 管理验证
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingSection}>
+            <h3 className={styles.settingSectionTitle}>数据管理</h3>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>导出数据</label>
+                <p className={styles.settingDescription}>
+                  导出应用数据为本地文件，可选择导出的数据类型
+                </p>
+              </div>
+              <button
+                className={styles.btnPrimary}
+                onClick={onExportData}
+              >
+                导出数据
               </button>
             </div>
           </div>

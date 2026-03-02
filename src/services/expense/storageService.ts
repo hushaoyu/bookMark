@@ -1,17 +1,6 @@
-import { ExpenseItem, ExpenseCategory, Budget } from '../../types/expense/expense';
-import { defaultCategories } from '../../utils/expense/defaultCategories';
+import { ExpenseItem, Budget } from '../../types/expense/expense';
 
-/**
- * 旧分类ID到新分类ID的映射
- * 用于数据迁移时将旧分类映射到新分类
- */
-const CATEGORY_MIGRATION_MAP: Record<string, string> = {
-  // 旧分类ID -> 新分类ID
-  'snack': 'food', // 零食 -> 餐饮
-  'car': 'transport', // 汽车/加油 -> 交通
-  'gift': 'redpacket', // 请客送礼 -> 红包
-  // 其他分类保持不变
-};
+
 
 class ExpenseStorageService {
   private dbName = 'expense-tracker-db';
@@ -37,7 +26,6 @@ class ExpenseStorageService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const transaction = (event.target as IDBOpenDBRequest).transaction;
 
         // 创建记账记录表
         if (!db.objectStoreNames.contains('expenses')) {
@@ -48,50 +36,7 @@ class ExpenseStorageService {
           expenseStore.createIndex('createdAt', 'createdAt');
         }
 
-        // 创建分类表
-        if (!db.objectStoreNames.contains('categories')) {
-          const categoryStore = db.createObjectStore('categories', { keyPath: 'id' });
-          categoryStore.createIndex('type', 'type');
-          categoryStore.createIndex('order', 'order');
 
-          // 使用导入的默认分类数据
-          defaultCategories.forEach(category => {
-            categoryStore.put(category);
-          });
-        } else {
-          // 更新现有分类数据
-          if (transaction) {
-            const categoryStore = transaction.objectStore('categories');
-            const expenseStore = transaction.objectStore('expenses');
-
-            // 1. 清空旧分类数据
-            const clearRequest = categoryStore.clear();
-            clearRequest.onsuccess = () => {
-              // 2. 写入新的分类数据
-              defaultCategories.forEach(category => {
-                categoryStore.put(category);
-              });
-            };
-
-            // 3. 更新所有记账记录中的分类ID
-            const getAllExpensesRequest = expenseStore.getAll();
-            getAllExpensesRequest.onsuccess = () => {
-              const expenses = getAllExpensesRequest.result as ExpenseItem[];
-              let updatedCount = 0;
-
-              expenses.forEach(expense => {
-                const newCategoryId = CATEGORY_MIGRATION_MAP[expense.category];
-                if (newCategoryId) {
-                  expense.category = newCategoryId;
-                  expenseStore.put(expense);
-                  updatedCount++;
-                }
-              });
-
-              console.log(`已迁移 ${updatedCount} 条记账记录的分类`);
-            };
-          }
-        }
 
         // 创建预算表
         if (!db.objectStoreNames.contains('budgets')) {
@@ -105,54 +50,7 @@ class ExpenseStorageService {
     });
   }
 
-  /**
-   * 手动触发分类数据更新
-   * 用于强制更新分类数据（不升级数据库版本）
-   */
-  async refreshCategories(): Promise<void> {
-    const db = await this.init();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['categories', 'expenses'], 'readwrite');
-      const categoryStore = transaction.objectStore('categories');
-      const expenseStore = transaction.objectStore('expenses');
 
-      // 1. 清空旧分类数据
-      const clearRequest = categoryStore.clear();
-      clearRequest.onsuccess = () => {
-        // 2. 写入新的分类数据
-        defaultCategories.forEach(category => {
-          categoryStore.put(category);
-        });
-      };
-
-      // 3. 更新所有记账记录中的分类ID
-      const getAllExpensesRequest = expenseStore.getAll();
-      getAllExpensesRequest.onsuccess = () => {
-        const expenses = getAllExpensesRequest.result as ExpenseItem[];
-        let updatedCount = 0;
-
-        expenses.forEach(expense => {
-          const newCategoryId = CATEGORY_MIGRATION_MAP[expense.category];
-          if (newCategoryId) {
-            expense.category = newCategoryId;
-            expenseStore.put(expense);
-            updatedCount++;
-          }
-        });
-
-        console.log(`已更新 ${updatedCount} 条记账记录的分类`);
-      };
-
-      transaction.oncomplete = () => {
-        resolve();
-      };
-
-      transaction.onerror = () => {
-        console.error('分类更新失败:', transaction.error);
-        reject(new Error('Failed to refresh categories'));
-      };
-    });
-  }
 
   // 通用 CRUD 操作
   async add<T>(storeName: string, item: T): Promise<T> {
@@ -261,34 +159,7 @@ class ExpenseStorageService {
     return this.delete('expenses', id);
   }
 
-  // 分类相关操作
-  async addCategory(category: ExpenseCategory): Promise<ExpenseCategory> {
-    return this.add('categories', category);
-  }
 
-  async getCategory(id: string): Promise<ExpenseCategory | null> {
-    return this.get<ExpenseCategory>('categories', id);
-  }
-
-  async getAllCategories(): Promise<ExpenseCategory[]> {
-    const categories = await this.getAll<ExpenseCategory>('categories');
-    
-    // 如果分类数据为空，自动重新加载默认分类
-    if (categories.length === 0) {
-      await this.refreshCategories();
-      return this.getAll<ExpenseCategory>('categories');
-    }
-    
-    return categories;
-  }
-
-  async updateCategory(category: ExpenseCategory): Promise<ExpenseCategory> {
-    return this.update('categories', category);
-  }
-
-  async deleteCategory(id: string): Promise<void> {
-    return this.delete('categories', id);
-  }
 
   // 预算相关操作
   async addBudget(budget: Budget): Promise<Budget> {

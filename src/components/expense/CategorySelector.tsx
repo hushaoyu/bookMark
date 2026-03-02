@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ExpenseCategory } from '../../types/expense/expense';
-import { expenseStorageService } from '../../services/expense/storageService';
+import { expenseService } from '../../services/expense/expenseService';
 import styles from '../../styles/components/CategorySelector.module.css';
 
 interface CategorySelectorProps {
@@ -22,7 +22,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 
   const loadCategories = async () => {
     try {
-      const allCategories = await expenseStorageService.getAllCategories();
+      const allCategories = await expenseService.getAllCategories();
       const filteredCategories = allCategories
         .filter(category => category.type === type)
         .sort((a, b) => a.order - b.order);

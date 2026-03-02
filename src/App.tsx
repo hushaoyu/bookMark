@@ -6,6 +6,7 @@ import PasswordModal from './components/PasswordModal'
 import CustomSelect from './components/CustomSelect'
 import UpdateChecker from './components/UpdateChecker'
 import SettingsModal from './components/SettingsModal'
+import ExportModal from './components/ExportModal'
 import AuthSettings from './components/AuthSettings'
 import HomePage from './components/expense/HomePage'
 import StatisticsPage from './components/expense/StatisticsPage'
@@ -18,6 +19,7 @@ const NoteForm = lazy(() => import('./components/NoteForm'))
 const NoteList = lazy(() => import('./components/NoteList'))
 
 import { LinkItem, NoteItem, AuthConfig } from './types'
+import { expenseService } from './services/expense/expenseService';
 import useLocalStorage from './hooks/useIncrementalStorage'
 import { 
   generateSalt, 
@@ -45,6 +47,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activePage, setActivePage] = useState<'expense' | 'list' | 'notes' | 'statistics'>('expense')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
   const [isAuthSettingsOpen, setIsAuthSettingsOpen] = useState(false)
 
   // 备忘录分类
@@ -369,31 +372,20 @@ const App: React.FC = () => {
 
   // 导出数据
   const handleExportData = () => {
-    const exportData = {
-      links,
-      notes
-    }
-    const dataStr = JSON.stringify(exportData, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `link-note-app-${new Date().toISOString().slice(0, 10)}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+    setExportModalOpen(true)
   }
 
   // 导入数据
-  const handleImportData = () => {
+  const handleImportData = async () => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const target = e.target as HTMLInputElement
       if (target.files && target.files[0]) {
         const file = target.files[0]
         const reader = new FileReader()
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const importedData = JSON.parse(event.target?.result as string)
             
@@ -434,6 +426,46 @@ const App: React.FC = () => {
                 }
               }
               
+              // 验证记账本数据
+              if (importedData.expenses || importedData.expenseCategories || importedData.expenseBudgets) {
+                // 验证支出数据
+                if (Array.isArray(importedData.expenses)) {
+                  const isValidExpenses = importedData.expenses.every((item: any) => 
+                    typeof item === 'object' && 
+                    item !== null && 
+                    typeof item.id === 'string' && 
+                    typeof item.amount === 'number' && 
+                    typeof item.category === 'string' && 
+                    typeof item.type === 'string' && 
+                    typeof item.date === 'string' && 
+                    typeof item.description === 'string' && 
+                    typeof item.createdAt === 'string' && 
+                    typeof item.updatedAt === 'string'
+                  )
+                  if (!isValidExpenses) {
+                    alert('导入的数据格式不正确，请确保记账数据格式有效。')
+                    return
+                  }
+                }
+                
+  
+                
+                // 验证预算数据
+                if (Array.isArray(importedData.expenseBudgets)) {
+                  const isValidBudgets = importedData.expenseBudgets.every((item: any) => 
+                    typeof item === 'object' && 
+                    item !== null && 
+                    typeof item.id === 'string' && 
+                    typeof item.amount === 'number' && 
+                    typeof item.period === 'string'
+                  )
+                  if (!isValidBudgets) {
+                    alert('导入的数据格式不正确，请确保预算数据格式有效。')
+                    return
+                  }
+                }
+              }
+              
               // 询问用户是覆盖还是合并导入
               const importOption = window.confirm('请选择导入方式：\n点击确定 - 覆盖当前数据\n点击取消 - 合并导入数据（避免重复）')
               
@@ -454,6 +486,53 @@ const App: React.FC = () => {
                     id: Date.now().toString()
                   }))
                   setNotes(notesWithNewIds)
+                }
+                
+                // 记账本数据全覆盖导入
+                if (importedData.expenses || importedData.expenseCategories || importedData.expenseBudgets) {
+                  try {
+                    // 先清空现有数据
+                    if (importedData.expenses) {
+                      const existingExpenses = await expenseService.getAllExpenses()
+                      for (const expense of existingExpenses) {
+                        await expenseService.deleteExpense(expense.id)
+                      }
+                      // 导入新数据
+                      for (const expense of importedData.expenses) {
+                        await expenseService.createExpense({
+                          amount: expense.amount,
+                          category: expense.category,
+                          type: expense.type,
+                          date: expense.date,
+                          description: expense.description,
+                          paymentMethod: expense.paymentMethod || '现金',
+                          tags: expense.tags || []
+                        })
+                      }
+                    }
+                    
+
+                    
+                    if (importedData.expenseBudgets) {
+                      const existingBudgets = await expenseService.getAllBudgets()
+                      for (const budget of existingBudgets) {
+                        await expenseService.deleteBudget(budget.id)
+                      }
+                      // 导入新数据
+                      for (const budget of importedData.expenseBudgets) {
+                        await expenseService.createBudget({
+                          amount: budget.amount,
+                          period: budget.period,
+                          categoryId: budget.categoryId,
+                          startDate: budget.startDate,
+                          endDate: budget.endDate
+                        })
+                      }
+                    }
+                  } catch (error) {
+                    console.error('导入记账数据失败:', error)
+                    alert('导入记账数据失败，请重试')
+                  }
                 }
               } else {
                 // 合并模式
@@ -497,7 +576,7 @@ const App: React.FC = () => {
                       const existingTasks = existingNote.tasks || []
                       const importedTasks = importedNote.tasks || []
                       const mergedTasks = [...existingTasks]
-                       
+                        
                       importedTasks.forEach((importedTask: any) => {
                         const existingTaskIndex = mergedTasks.findIndex(task => task.text === importedTask.text)
                         if (existingTaskIndex === -1) {
@@ -505,7 +584,7 @@ const App: React.FC = () => {
                           mergedTasks.push(importedTask)
                         }
                       })
-                       
+                        
                       mergedNotes[existingIndex] = {
                         ...existingNote,
                         content: mergedContent,
@@ -774,6 +853,15 @@ const App: React.FC = () => {
           setIsSettingsOpen(false)
           setIsAuthSettingsOpen(true)
         }}
+        onExportData={handleExportData}
+      />
+
+      {/* 导出弹窗 */}
+      <ExportModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        links={links}
+        notes={notes}
       />
 
       {/* 导航栏 */}
