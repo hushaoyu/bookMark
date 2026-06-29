@@ -1,6 +1,6 @@
 {
-  "name": "个人工具",
-  "short_name": "个人工具",
+  "name": "万事屋",
+  "short_name": "万事屋",
   "description": "一个用于收纳管理个人工具的PWA应用",
   "start_url": "/",
   "display": "standalone",
