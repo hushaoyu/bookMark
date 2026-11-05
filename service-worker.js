@@ -9,7 +9,7 @@ const CACHE_NAMES = {
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/pwa-192x192.svg',
   '/pwa-512x512.svg',
   '/favicon.ico'
