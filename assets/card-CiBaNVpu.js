@@ -1,0 +1,1 @@
+function t(t){return t.trim().slice(-4)}function e(t){const e=t.trim();if(e.length<=4)return"*".repeat(Math.max(e.length-1,1))+e.slice(-1);const n=e.length-4,r=[],s=Math.floor(n/4);for(let c=0;c<s;c++)r.push("****");const o=n%4;return o>0&&r.push("*".repeat(o)),r.push(e.slice(-4)),r.join(" ")}export{t as c,e as m};
