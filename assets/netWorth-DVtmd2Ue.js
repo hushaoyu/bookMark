@@ -1,0 +1,1 @@
+import{Y as t,U as s,R as i}from"./index-B49M6DWg.js";function a(a,o,l){const e=t(s(a,o)),{holdingValue:n}=i(l);return{totalAccountAssets:e.totalAssets,holdingValue:n,totalLiabilities:e.totalLiabilities,netWorth:e.totalAssets+n-e.totalLiabilities}}export{a as c};
